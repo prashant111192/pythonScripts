@@ -14,7 +14,7 @@ n = int(input('Number of Timesteps: '))
 
 files = np.atleast_3d(np.empty)
 
-
+a=[]
 for i in (range(n)):
     # print(type(i))
     i=format(int(i),'0>4')
@@ -25,11 +25,15 @@ for i in (range(n)):
         lineCount = 0 
         for row in csv_reader:
             if lineCount > 5:
-                print(f'{",".join(row)}')
+                for j in range(row):
+                    print(type(csv_reader(row)))
+                # print(f'{",".join(row)}')
+                # a=np.append(a,csv_reader(row))
             lineCount +=1
+            print(lineCount)
 # print(csv_reader)
 
-        print(type(csv_reader)
+        # print(type(csv_reader)
     # temp = np.loadtxt('CsvPipe'+'_'+str(i)+'.csv', delimiter = ';', skiprows =4)
     # temp = np.loadtxt('CsvPipe_'+str(i)+'.csv', delimiter = ';', skiprows =100)
     # print(type(i))
