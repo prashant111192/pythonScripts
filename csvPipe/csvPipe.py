@@ -25,13 +25,13 @@ for i in (range(n)):
         lineCount = 0 
         for row in csv_reader:
             if lineCount > 5:
-                for j in range(row):
-                    print(type(csv_reader(row)))
-                # print(f'{",".join(row)}')
-                # a=np.append(a,csv_reader(row))
+                print(type(csv_reader[:,row]))
             lineCount +=1
             print(lineCount)
 # print(csv_reader)
+                # print(f'{",".join(row)}')
+            # if lineCount > 5:
+                # a=np.append(a,csv_reader(row))
 
         # print(type(csv_reader)
     # temp = np.loadtxt('CsvPipe'+'_'+str(i)+'.csv', delimiter = ';', skiprows =4)
