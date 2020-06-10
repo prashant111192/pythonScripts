@@ -15,17 +15,29 @@ n = int(input('Number of Timesteps: '))
 files = np.atleast_3d(np.empty)
 
 a=[]
+
 for i in (range(n)):
-    print(type(i))
-    i=format(int(i),'0>4')
-    print(i)
     # print(type(i))
-    # with open('CsvPipe_'+str(i)+'.csv') as csv_file:
-        # csv_reader = csv.reader(csv_file, delimiter=';') 
-        # lineCount = 0 
-        # for row in csv_reader:
-        #     if lineCount > 5:
-        #         print(type(csv_reader[:,row]))
+    i=format(int(i),'0>4')
+    # print(i)
+    # print(type(i))
+    with open('CsvPipe_'+str(i)+'.csv') as csv_file:
+        csvarr = csv.reader(csv_file, delimiter=';') 
+        # print(type(csvarr))
+        lineCount = 0 
+        csvarr = list(csvarr)
+        csvarr = np.array(csvarr)
+        # print(csvarr)
+        # print(csvarr.shape)
+        # print(type(csvarr))
+        # print(type(data))
+        print(csvarr)
+
+        # for row in csvarr[3,:]:
+            # print(','.join(row))
+            # if lineCount > 5:
+                # print(type(csv_reader[:,row]))
+
         #     lineCount +=1
         #     print(lineCount)
 # print(csv_reader)
@@ -35,7 +47,7 @@ for i in (range(n)):
 
         # print(type(csv_reader)
     # temp = np.loadtxt('CsvPipe'+'_'+str(i)+'.csv', delimiter = ';', skiprows =4)
-    temp = np.loadtxt('CsvPipe_'+str(i)+'.csv', delimiter = ';', skiprows =4)
+    # temp = np.loadtxt('CsvPipe_'+str(i)+'.csv', delimiter = ';', skiprows =4)
     # print(type(i))
     # sorted(temp, 3) 
     # temp[:,[0,3]] = temp[:,[3,0]]
