@@ -1,10 +1,10 @@
-#!/usr/bin/python3
+#easier !/usr/bin/python3
 
 import sys
 import numpy as np
 import csv
 import os
-import pandas
+# import pandas
 import statistics as stat
 import matplotlib.pyplot as plt
 # from tqdm.auto import tqdm
@@ -28,10 +28,10 @@ for i in (range(n)):
         csvarr = list(csvarr)
         csvarr = np.array(csvarr)
         # print(csvarr)
-        # print(csvarr.shape)
+        print(csvarr[1].shape)
         # print(type(csvarr))
         # print(type(data))
-        print(csvarr)
+        # print(csvarr)
 
         # for row in csvarr[3,:]:
             # print(','.join(row))
