@@ -47,7 +47,7 @@ for j in (range(1,n)):
         if diff_pos[k] < -8:
             comp_arr[k,0,j] = comp_arr[k,0,j-1] - distance_pb(temp_pos_pre[k],temp[k,0])
             # temp[k,0] = comp_arr[k,0,j-1] + distance_pb(temp_pos_pre[k],temp[k,0])
-            print(1)
+            # print(1)
 
         elif diff_pos[k] > 8:
             comp_arr[k,0,j] = comp_arr[k,0,j-1] + distance_pb(temp_pos_pre[k],temp[k,0])
@@ -73,8 +73,8 @@ i=0
 while i<n:
     ax.scatter(comp_arr[:,0,i], comp_arr[:,1,i], comp_arr[:,2,i])
     i=i+1
-    plt.show()
-    plt.pause(0.5)
+    plt.draw()
+    plt.pause(0.0001)
     plt.clf()
 # plt.pause(0.5)
 # plt.clf()
