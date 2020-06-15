@@ -10,16 +10,23 @@ import matplotlib.pyplot as plt
 # from tqdm.auto import tqdm
 
 n = int(input('Number of Timesteps: '))
-ts = int(input('Duration of Timesteps: '))
+ts = float(input('Duration of Timesteps: '))
 # name = str(input("name of the file"))
 
 comp_arr = np.atleast_3d(np.empty)
 
 # a=[]
 
+def take_fourth(elem):
+    return
+
 for j in (range(n)):
-    i=format(int(i),'0>4')
-    csvarr = np.genfromtxt('CsvPipe'+'_'+str(i)+'.csv', skip_header=4, delimiter=';', usecols=(0,1,2,3,4,5,6,7,8), dtype=np.float)
+    i=format(int(j),'0>4')
+    temp = np.genfromtxt('CsvPipe'+'_'+str(i)+'.csv', skip_header=4, delimiter=';', usecols=(0,1,2,3,4,5,6,7,8), dtype=np.float)
+    temp = sorted(temp, key=lambda x:x[3])
+    print(temp)
+    # print('1111111111111111111111111111111111111111111')
+
 
 
 
@@ -31,10 +38,10 @@ for j in (range(n)):
 
 
     # print(type(i))
-    i=format(int(i),'0>4')
+    # i=format(int(i),'0>4')
     # print(i)
     # print(type(i))
-    csvarr = np.genfromtxt('CsvPipe'+'_'+str(i)+'.csv', skip_header=4, delimiter=';', usecols=(0,1,2,3,4,5,6,7,8), dtype=np.float)
+    # csvarr = np.genfromtxt('CsvPipe'+'_'+str(i)+'.csv', skip_header=4, delimiter=';', usecols=(0,1,2,3,4,5,6,7,8), dtype=np.float)
     # with open('CsvPipe_'+str(i)+'.csv') as csv_file:
         # csvarr = csv.reader(csv_file, delimiter=';') 
         # print(type(csvarr))
@@ -42,7 +49,7 @@ for j in (range(n)):
         # csvarr = list(csvarr)
     # csvarr = np.array(csvarr)
     # print(csvarr[1])
-    print(csvarr.shape)
+    # print(csvarr.shape)
         # print(np.array(csvarr[1]))
         # print(type(csvarr))
         # print(type(data))
