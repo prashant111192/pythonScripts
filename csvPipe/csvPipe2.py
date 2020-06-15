@@ -1,4 +1,4 @@
-#easier !/usr/bin/python3
+#!/usr/bin/python3
 
 import sys
 import numpy as np
@@ -14,21 +14,23 @@ n = int(input('Number of Timesteps: '))
 
 files = np.atleast_3d(np.empty)
 
-a=[]
+# a=[]
 
 for i in (range(n)):
     # print(type(i))
     i=format(int(i),'0>4')
     # print(i)
     # print(type(i))
-    with open('CsvPipe_'+str(i)+'.csv') as csv_file:
-        csvarr = csv.reader(csv_file, delimiter=';') 
+    csvarr = np.genfromtxt('CsvPipe'+'_'+str(i)+'.csv', skip_header=4, delimiter=';', usecols=(0,1,2,3,4,5,6,7,8), dtype=np.float)
+    # with open('CsvPipe_'+str(i)+'.csv') as csv_file:
+        # csvarr = csv.reader(csv_file, delimiter=';') 
         # print(type(csvarr))
-        lineCount = 0 
-        csvarr = list(csvarr)
-        csvarr = np.array(csvarr)
-        # print(csvarr)
-        print(csvarr[1].shape)
+        # lineCount = 0 
+        # csvarr = list(csvarr)
+    # csvarr = np.array(csvarr)
+    # print(csvarr[1])
+    print(csvarr.shape)
+        # print(np.array(csvarr[1]))
         # print(type(csvarr))
         # print(type(data))
         # print(csvarr)
