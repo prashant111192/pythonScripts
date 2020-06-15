@@ -13,19 +13,25 @@ n = int(input('Number of Timesteps: '))
 ts = float(input('Duration of Timesteps: '))
 # name = str(input("name of the file"))
 
-comp_arr = np.atleast_3d(np.empty)
 
-# a=[]
+temp = np.genfromtxt('CsvPipe_0000.csv', skip_header=4, delimiter=';', usecols=(0,1,2,3,4,5,6,7,8), dtype=np.float)
+comp_arr = np.empty((temp.shape[0],temp.shape[1],n))
+comp_arr[:,:,0] = sorted(temp, key=lambda x:x[3])
+addition = np.zeros((temp.shape[0]))
+# print(temp2)
+# print(comp_arr.shape)
 
-def take_fourth(elem):
-    return
-
-for j in (range(n)):
+for j in (range(1,n)):
     i=format(int(j),'0>4')
     temp = np.genfromtxt('CsvPipe'+'_'+str(i)+'.csv', skip_header=4, delimiter=';', usecols=(0,1,2,3,4,5,6,7,8), dtype=np.float)
     temp = sorted(temp, key=lambda x:x[3])
-    print(temp)
-    # print('1111111111111111111111111111111111111111111')
+    diff_pos = temp[:,0] - comp_arr[:,0,(j-1)] 
+
+
+    for(row in temp):
+        temp
+
+
 
 
 
