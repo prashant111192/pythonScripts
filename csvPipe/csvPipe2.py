@@ -64,12 +64,23 @@ for j in (range(1,n)):
     temp_pos_pre = temp[:,0]
     # fig = plt.figure()
     # ax = fig.add_subplot(111, projection='3d')
-    plt.scatter(comp_arr[:,0,j], comp_arr[:,1,j], comp_arr[:,2,j])
+
+
+plt.ion()
+fig=plt.figure()
+ax = Axes3D(fig) 
+i=0
+while i<n:
+    ax.scatter(comp_arr[:,0,i], comp_arr[:,1,i], comp_arr[:,2,i])
+    i=i+1
+    plt.show()
     plt.pause(0.5)
     plt.clf()
-
+# plt.pause(0.5)
+# plt.clf()
+#
 # fig.clf()
-plt.show()
+# plt.show()
 
     
 
