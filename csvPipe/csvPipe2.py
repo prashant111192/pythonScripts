@@ -13,6 +13,9 @@ n = int(input('Number of Timesteps: '))
 ts = float(input('Duration of Timesteps: '))
 # name = str(input("name of the file"))
 
+def distance_pb(end,start):
+    return (10-end+start)
+
 
 temp = np.genfromtxt('CsvPipe_0000.csv', skip_header=4, delimiter=';', usecols=(0,1,2,3,4,5,6,7,8), dtype=np.float)
 comp_arr = np.empty((temp.shape[0],temp.shape[1],n))
@@ -20,16 +23,30 @@ comp_arr[:,:,0] = sorted(temp, key=lambda x:x[3])
 addition = np.zeros((temp.shape[0]))
 # print(temp2)
 # print(comp_arr.shape)
+temp_pos_pre = comp_arr[:,0,0]
 
 for j in (range(1,n)):
     i=format(int(j),'0>4')
     temp = np.genfromtxt('CsvPipe'+'_'+str(i)+'.csv', skip_header=4, delimiter=';', usecols=(0,1,2,3,4,5,6,7,8), dtype=np.float)
     temp = sorted(temp, key=lambda x:x[3])
-    diff_pos = temp[:,0] - comp_arr[:,0,(j-1)] 
+    diff_pos = temp[:,0] - temp_pos_pre[:,0] 
+    
+    for(row in diff_pos):
+        if diff_pos[row] < -8:
+            comp_arr[row,0,j] = comp_arr[row,0,j-1] + distance(temp_pos_pre[row],temp[row])
+
+        elif diff_pos[row] > 8:
+            comp_arr[row,0,j] = comp_arr[row,0,j-1] - distance(temp_pos_pre[row],temp[row])
+
+        else:
+            comp_arr[row,0,j] = comp_arr[row,0,j-1] + diff_pos[row]
 
 
-    for(row in temp):
-        temp
+    comp_arr[:,1:,j]=temp[:,1:]
+
+
+
+        
 
 
 
