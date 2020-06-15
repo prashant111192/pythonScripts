@@ -10,13 +10,26 @@ import matplotlib.pyplot as plt
 # from tqdm.auto import tqdm
 
 n = int(input('Number of Timesteps: '))
+ts = int(input('Duration of Timesteps: '))
 # name = str(input("name of the file"))
 
-files = np.atleast_3d(np.empty)
+comp_arr = np.atleast_3d(np.empty)
 
 # a=[]
 
-for i in (range(n)):
+for j in (range(n)):
+    i=format(int(i),'0>4')
+    csvarr = np.genfromtxt('CsvPipe'+'_'+str(i)+'.csv', skip_header=4, delimiter=';', usecols=(0,1,2,3,4,5,6,7,8), dtype=np.float)
+
+
+
+
+
+
+
+
+
+
     # print(type(i))
     i=format(int(i),'0>4')
     # print(i)
