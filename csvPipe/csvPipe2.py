@@ -28,7 +28,7 @@ addition = np.zeros((temp.shape[0]))
 # print(temp2)
 # print(comp_arr.shape)
 temp_pos_pre = comp_arr[:,0,0]
-print(temp_pos_pre.shape)
+# print(temp_pos_pre.shape)
 # c=0
 # d=0
 for j in (range(1,n)):
@@ -38,7 +38,7 @@ for j in (range(1,n)):
     # print(temp.shape)
     # temp = np.sort(temp, order =['f0'], axis =0)
     temp.view('i8,i8,i8,i8,i8,i8,i8,i8,i8').sort(order=['f3'],axis = 0)  
-    print(temp.shape)
+    # print(temp.shape)
     # print(type(temp))
     diff_pos = temp[:,0] - temp_pos_pre[:] 
     # print(diff_pos)
@@ -71,10 +71,11 @@ for j in (range(1,n)):
 # ax = Axes3D(fig) 
 # ax = fig.add_subplot(111, projection='3d')
 # i=0
-# while i<n:
+# for i in range(n):
+    # plt.cla()
     # ax.scatter(comp_arr[:,0,i], comp_arr[:,1,i], comp_arr[:,2,i])
     # i=i+1
-    # fig.canvas.draw()
+    # plt.draw()
     # plt.pause(0.5)
     # fig.clear()
 # plt.pause(0.5)
@@ -89,7 +90,7 @@ for j in (range(1,n)):
 # ax.plt(comp_arr[1,0,:],time)
 # plt.plot(comp_arr[120,0,:],timesteps)
 fig=plt.figure()
-ax = Axes3D(fig) 
+# ax = Axes3D(fig) 
 ax = fig.add_subplot(111, projection='3d')
 ax.scatter(comp_arr[:,0,1999], comp_arr[:,1,1999], comp_arr[:,2,1999])
 plt.xlabel('x')
@@ -102,20 +103,6 @@ plt.show()
 
 # print(c)
 # print(d)
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
 
     # print(type(i))
     # i=format(int(i),'0>4')
