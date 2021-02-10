@@ -8,13 +8,9 @@ import os
 import statistics as stat
 import matplotlib.pyplot as plt
 # from tqdm.auto import tqdm
-print ('Number of arguments:', len(sys.argv), 'arguments.')
-print ('Argument List:', str(sys.argv))
-# n = int(input('Number of CSV files: '))
-# skip = int(input('Last how many steps: '))
-n=int(sys.argv[1])
-skip=int(sys.argv[2])
 
+n = int(input('Number of CSV files: '))
+skip = int(input('Last how many steps: '))
 
 # Input sphase and fluent files
 c = np.loadtxt('Sphase.csv', delimiter = ', ', skiprows =0)
@@ -67,4 +63,4 @@ for i in (range (numberloc)):
 plt.plot(xloc,vavg, 'g.')
 plt.plot(sphase[:,0],sphase[:,1], 'r.')
 plt.plot(fluent[:,0],fluent[:,1], 'b.')
-plt.savefig(str(n)+'.eps' ,format='eps')
+plt.savefig('books_read.eps' ,format='eps')
