@@ -30,4 +30,4 @@ for i in range (n):
 i=0
 
 for i in range(n):
-    print ('\t\t\t\t<velocity name=\"17Velpt{}\">\n\t\t\t\t\t<point x=\"{}\" y=\"0\" z=\"{}\" comment=\"Measuring position\" units_comment=\"m\" />\n\t\t\t\t</velocity>'.format(i,tot[i],ht))
+    print ('\t\t\t\t<velocity name=\"16Velpt{}\">\n\t\t\t\t\t<point x=\"{}\" y=\"0\" z=\"{}\" comment=\"Measuring position\" units_comment=\"m\" />\n\t\t\t\t</velocity>'.format(i,tot[i],ht))
