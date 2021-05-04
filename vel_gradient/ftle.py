@@ -19,9 +19,9 @@ def read_csv(first,last):
     arr2 = np.loadtxt('withdraft_'+str(last)+'.csv', dtype=float, delimiter=';', skiprows=3, usecols=(0,1,2,3,4,5,6,7,8))
     # extract only the fluids
     arr1 = arr1[arr1[:,8]==3]
-    arr1 = arr1[0:10000,:]
+    arr1 = arr1[0:100000,:]
     arr2 = arr2[arr2[:,8]==3]
-    arr2 = arr2[0:10000,:]
+    arr2 = arr2[0:100000,:]
     # print(arr1)
 
     return arr1, arr2
@@ -75,14 +75,14 @@ def fnn(arr1,arr2,h,T):
 
 
 def multi_fx(count,arr1,arr2,h,T):
-    arr1 = displacement(arr1,count)
-    arr2 = displacement(arr2,count)
+    arr1_temp = displacement(arr1,count)
+    arr2_temp = displacement(arr2,count)
     #choosing indices based on 2h
-    temp_indices = arr1[:,8]<(h)
-    temp_indices = arr1[:,8]!=0
+    temp_indices = arr1_temp[:,8]<(h)
+    temp_indices = arr1_temp[:,8]!=0
     #geting nearest neighbours
-    using_arr1 = get_arr(temp_indices,arr1)
-    using_arr2 = get_arr(temp_indices,arr2)
+    using_arr1 = get_arr(temp_indices,arr1_temp)
+    using_arr2 = get_arr(temp_indices,arr2_temp)
     #find max ratio, sqrt, ln
     sig=ratio(using_arr1,using_arr2)/T
     # print(sig)
