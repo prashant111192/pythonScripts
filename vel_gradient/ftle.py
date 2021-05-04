@@ -21,16 +21,19 @@ def read_csv(first,last):
     #picked 0_x,1_z,2_idp and 3_type
 
     # extract only the fluids
-    arr1 = arr1[arr1[:,8]==3]
-    arr1 = arr1[0:100,:]
-    arr2 = arr2[arr2[:,8]==3]
-    arr2 = arr2[0:100,:]
+    arr1 = arr1[arr1[:,3]==3]
+    # arr1 = arr1[0:10,:]
+    arr1 = np.delete(arr1,3,1)
+    
+    arr2 = arr2[arr2[:,3]==3]
+    # arr2 = arr2[0:10,:]
+    arr2 = np.delete(arr2,3,1)
     # print(arr1)
 
     return arr1, arr2
 
 # Sort array based on idp -> easier for calculating
-def sort(arr1, pos = 3):
+def sort(arr1, pos = 2):
     arr1 = arr1[np.argsort(arr1[:,pos])]
     return (arr1)
 
@@ -38,15 +41,21 @@ def sort(arr1, pos = 3):
 # adding displacement column
 def displacement(arr,i):
     x = arr[:,0]
-    z = arr[:,2]
+    # print(x)
+    z = arr[:,1]
     x = x - arr[i,0]
-    z = z - arr[i,2]
+    # print(x)
+    z = z - arr[i,1]
     # print(z)
     sqrt_vec = np.vectorize(math.sqrt)
     disp = sqrt_vec((x*x) + (z*z))
-    disp = disp.reshape(len(disp))
-    arr_temp = arr
-    arr_temp[:,8] = disp
+    disp = disp.reshape(len(disp),1)
+    arr_temp = np.append(arr,disp,1)
+    # print(np.shape(arr_temp))
+    # print(disp-arr_temp[:,3])
+    # print(disp)
+    # print(arr_temp[:,3])
+    # arr_temp[:,8] = disp
     return (arr_temp)
 
 #getting the useful array
@@ -59,8 +68,10 @@ def get_arr(temp_indices,arr):
 
 #max ratio and sqrt with ln 
 def ratio(arr1,arr2):
-    inv_arr1 = 1/arr1[:,8]
-    temp_div=np.outer(arr2[:,8],inv_arr1)
+    inv_arr1 = 1/arr1[:,3]
+    # print(np.shape(inv_arr1))
+    temp_div=np.outer(arr2[:,3],inv_arr1)
+    # print(np.shape(temp_div))
     ind = np.unravel_index(np.argmax(temp_div, axis=None), temp_div.shape)
     sig_T = np.log(np.sqrt(temp_div[ind]))
     return sig_T
@@ -68,11 +79,16 @@ def ratio(arr1,arr2):
 #find nearest neighbours
 def fnn(arr1,arr2,h,T):
     #append zero array (in the space used by mk number)
-    arr1[:,8] = np.zeros(len(arr1))
-    count = range(len(arr1)-1)
+    # arr1[:,3] = np.zeros(len(arr1))
+    count = range(len(arr1))
     num_cores = multiprocessing.cpu_count()
-    sig = Parallel(n_jobs = num_cores)(delayed(multi_fx)(alpha,arr1,arr2,h,T) for alpha in count)
-    # sig= multi_fx(alpha)
+    sig = Parallel(n_jobs = num_cores)(delayed(multi_fx)(alpha,arr1,arr2,h,T) for alpha in tqdm(count))
+    # sig = np.arange(len(arr1))
+    # for alpha in tqdm(count):
+    #      # print(alpha)
+    #      sig[alpha]= multi_fx(alpha,arr1,arr2,h,T)
+         # sig = np.concatenate(sig,sig_temp)
+
     return (sig)
 
 
@@ -80,15 +96,24 @@ def multi_fx(count,arr1,arr2,h,T):
     arr1_temp = displacement(arr1,count)
     arr2_temp = displacement(arr2,count)
     #choosing indices based on 2h
-    temp_indices = arr1_temp[:,8]<(h)
-    temp_indices = arr1_temp[:,8]!=0
+    temp_indices1 = arr1_temp[:,3]<(2*h)
+    # temp_indices - np.argwhere(arr1_temp[:,3]>h,axis = 1)
+    # print(temp_indices)
+    # print(np.shape(arr1_temp))
+    arr1_temp = arr1_temp[temp_indices1]
+    arr2_temp = arr2_temp[temp_indices1]
+    temp_indices2 = arr1_temp[:,3]!=0
+    # arr1_temp = arr1_temp[temp_indices]
     #geting nearest neighbours
-    using_arr1 = get_arr(temp_indices,arr1_temp)
-    using_arr2 = get_arr(temp_indices,arr2_temp)
+    using_arr1 = arr1_temp[temp_indices2]
+    # print(np.shape(using_arr1))
+    using_arr2 = arr2_temp[temp_indices2]
+    # using_arr1 = get_arr(temp_indices,arr1_temp)
+    # using_arr2 = get_arr(temp_indices,arr2_temp)
     #find max ratio, sqrt, ln
     sig=ratio(using_arr1,using_arr2)/T
     # print(sig)
-    return (sig, count)
+    return (sig,count)
 
 
 def main():
@@ -104,8 +129,8 @@ def main():
     arr2 = sort(arr2)
     # print(np.shape(arr1))
 
-    sig=fnn(arr1,arr2,0.2,0.01)
-    print(np.shape(sig))
+    sig=fnn(arr1,arr2,0.042426,0.30143)
+    # print(np.shape(sig))
     # # Velocity magnitude
     # arr1 = displacement(arr1)
     # arr2 = displacement(arr2)
