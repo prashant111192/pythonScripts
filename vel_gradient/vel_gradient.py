@@ -7,8 +7,8 @@ import math
 
 # read multiple csv
 def read_csv(start):
-    arr1 = np.loadtxt('withoutdraft_'+str(start)+'.csv', dtype=float, delimiter=';', skiprows=3, usecols=(0,1,2,3,4,5,6,7,8))
-    arr2 = np.loadtxt('withoutdraft_'+str(start+1)+'.csv', dtype=float, delimiter=';', skiprows=3, usecols=(0,1,2,3,4,5,6,7,8))
+    arr1 = np.loadtxt('withdraft_'+str(start)+'.csv', dtype=float, delimiter=';', skiprows=3, usecols=(0,1,2,3,4,5,6,7,8))
+    arr2 = np.loadtxt('withdraft_'+str(start+1)+'.csv', dtype=float, delimiter=';', skiprows=3, usecols=(0,1,2,3,4,5,6,7,8))
     # arr2 = np.loadtxt('withoutdraft_1105.csv', dtype=float, delimiter=';', skiprows=3, usecols=(0,1,2,3,4,5,6,7,8))
     ## extract only the fluids
     arr1 = arr1[arr1[:,8]==3]
@@ -118,6 +118,7 @@ def main():
     #Dead volume
     print('Dead Volume : '+str(amount_of(arr2, 0.001)))
     print('LVZ : '+str(amount_of(arr2, 0.01)))
+    print('done')
     print('Velocity gradient (mean) : '+str(vel_grad_(arr1, arr2)))
     print(arr1[2:5,:])
 
