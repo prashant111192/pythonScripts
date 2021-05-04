@@ -15,13 +15,16 @@ from tqdm import tqdm
 # read multiple csv
 def read_csv(first,last):
     #Preparing first/main array
-    arr1 = np.loadtxt('withdraft_'+str(first)+'.csv', dtype=float, delimiter=';', skiprows=3, usecols=(0,1,2,3,4,5,6,7,8))
-    arr2 = np.loadtxt('withdraft_'+str(last)+'.csv', dtype=float, delimiter=';', skiprows=3, usecols=(0,1,2,3,4,5,6,7,8))
+    #0_Pos.x[m];1_Pos.y[m];2_Pos.z[m];3_Idp;4_Vel.x[m/s];5_Vel.y[m/s];6_Vel.z[m/s];7_Rhop[kg/m^3];8_Type;
+    arr1 = np.loadtxt('withdraft_'+str(first)+'.csv', dtype=float, delimiter=';', skiprows=3, usecols=(0,2,3,8))
+    arr2 = np.loadtxt('withdraft_'+str(last)+'.csv', dtype=float, delimiter=';', skiprows=3, usecols=(0,2,3,8))
+    #picked 0_x,1_z,2_idp and 3_type
+
     # extract only the fluids
     arr1 = arr1[arr1[:,8]==3]
-    arr1 = arr1[0:100000,:]
+    arr1 = arr1[0:100,:]
     arr2 = arr2[arr2[:,8]==3]
-    arr2 = arr2[0:100000,:]
+    arr2 = arr2[0:100,:]
     # print(arr1)
 
     return arr1, arr2
@@ -68,9 +71,8 @@ def fnn(arr1,arr2,h,T):
     arr1[:,8] = np.zeros(len(arr1))
     count = range(len(arr1)-1)
     num_cores = multiprocessing.cpu_count()
-    sig = Parallel(n_jobs = num_cores)(delayed(multi_fx)(alpha,arr1,arr2,h,T) for alpha in tqdm(count))
+    sig = Parallel(n_jobs = num_cores)(delayed(multi_fx)(alpha,arr1,arr2,h,T) for alpha in count)
     # sig= multi_fx(alpha)
-
     return (sig)
 
 
