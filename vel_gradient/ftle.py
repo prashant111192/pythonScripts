@@ -130,6 +130,7 @@ def main():
     # print(np.shape(arr1))
 
     sig=fnn(arr1,arr2,0.042426,0.30143)
+    np.savetxt("sig.csv",sig, delimiter=",")
     # print(np.shape(sig))
     # # Velocity magnitude
     # arr1 = displacement(arr1)
