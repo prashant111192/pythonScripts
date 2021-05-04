@@ -2,6 +2,13 @@
 
 import numpy as np
 import math
+# import time 
+import multiprocessing
+from joblib import Parallel, delayed
+from  datetime import datetime
+from tqdm import tqdm 
+
+
 # import pandas as pd
 
 
@@ -12,7 +19,9 @@ def read_csv(first,last):
     arr2 = np.loadtxt('withdraft_'+str(last)+'.csv', dtype=float, delimiter=';', skiprows=3, usecols=(0,1,2,3,4,5,6,7,8))
     # extract only the fluids
     arr1 = arr1[arr1[:,8]==3]
+    arr1 = arr1[0:10000,:]
     arr2 = arr2[arr2[:,8]==3]
+    arr2 = arr2[0:10000,:]
     # print(arr1)
 
     return arr1, arr2
@@ -29,37 +38,55 @@ def displacement(arr,i):
     z = arr[:,2]
     x = x - arr[i,0]
     z = z - arr[i,2]
+    # print(z)
     sqrt_vec = np.vectorize(math.sqrt)
     disp = sqrt_vec((x*x) + (z*z))
     disp = disp.reshape(len(disp))
-    arr[:,8] = disp
-    return (arr)
+    arr_temp = arr
+    arr_temp[:,8] = disp
+    return (arr_temp)
 
+#getting the useful array
+def get_arr(temp_indices,arr):
+    #array to be built
+    temp_arr = arr[temp_indices]
+    # print(np.shape(temp_arr))
+
+    return temp_arr
+
+#max ratio and sqrt with ln 
+def ratio(arr1,arr2):
+    inv_arr1 = 1/arr1[:,8]
+    temp_div=np.outer(arr2[:,8],inv_arr1)
+    ind = np.unravel_index(np.argmax(temp_div, axis=None), temp_div.shape)
+    sig_T = np.log(np.sqrt(temp_div[ind]))
+    return sig_T
 
 #find nearest neighbours
-def fnn(arr,h):
+def fnn(arr1,arr2,h,T):
     #append zero array (in the space used by mk number)
-    arr[:,8] = np.zeros(len(arr))
-    indices=[]
-    count=0
-    # print(arr)
-    for i in arr:
-        #calculating displacement
-        arr = displacement(arr,count)
-        #choosing indices based on 2h
-        temp_indices = arr[:,8]<(h)
-        # print(temp_indices)
-        # indices = indices.reshape(len(indices),1)
-        indices = np.append(indices,temp_indices)
-        count=count+1
-    
-    print(indices)
+    arr1[:,8] = np.zeros(len(arr1))
+    count = range(len(arr1)-1)
+    num_cores = multiprocessing.cpu_count()
+    sig = Parallel(n_jobs = num_cores)(delayed(multi_fx)(alpha,arr1,arr2,h,T) for alpha in tqdm(count))
+    # sig= multi_fx(alpha)
+
+    return (sig)
 
 
-    # indices = indices.reshape(len(arr),len(arr))
-    return (indices)
-
-
+def multi_fx(count,arr1,arr2,h,T):
+    arr1 = displacement(arr1,count)
+    arr2 = displacement(arr2,count)
+    #choosing indices based on 2h
+    temp_indices = arr1[:,8]<(h)
+    temp_indices = arr1[:,8]!=0
+    #geting nearest neighbours
+    using_arr1 = get_arr(temp_indices,arr1)
+    using_arr2 = get_arr(temp_indices,arr2)
+    #find max ratio, sqrt, ln
+    sig=ratio(using_arr1,using_arr2)/T
+    # print(sig)
+    return (sig, count)
 
 
 def main():
@@ -73,10 +100,10 @@ def main():
     # sort on the basis of idp
     arr1 = sort(arr1)
     arr2 = sort(arr2)
-    # print(arr1)
+    # print(np.shape(arr1))
 
-    indices=fnn(arr1,0.2)
-    print(np.shape(indices))
+    sig=fnn(arr1,arr2,0.2,0.01)
+    print(np.shape(sig))
     # # Velocity magnitude
     # arr1 = displacement(arr1)
     # arr2 = displacement(arr2)
