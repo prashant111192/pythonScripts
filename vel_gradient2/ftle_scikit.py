@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 
-from sklearn.neighbors import BallTree
-import gc
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.ma as ma
@@ -22,11 +20,10 @@ def read_csv(first,last):
     #Preparing first/main array
     #0_Pos.x[m];1_Pos.y[m];2_Pos.z[m];3_Idp;4_Vel.x[m/s];5_Vel.y[m/s];6_Vel.z[m/s];7_Rhop[kg/m^3];8_Type;
     # arr1 = np.loadtxt('Points_000'+str(first)+'.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
-    # arr2 = np.loadtxt('Points_000'+str(last)+'.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
-    #picked 0_x,1_z,2_idp and 3_type
     arr1 = np.loadtxt('withdraft_1104.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
     # arr2 = np.loadtxt('Points_000'+str(last)+'.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
     arr2 = np.loadtxt('withdraft_1105.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
+    #picked 0_x,1_z,2_idp and 3_type
 
     # extract only the fluids
     arr1 = arr1[arr1[:,3]==3]
@@ -126,10 +123,10 @@ def multi_fx(count,arr1,arr2,h,T):
 
 def cKDTree_method(arr1,h):
     tree =cKDTree(arr1[:,0:1])
-    nn_dist,index= tree.query(arr1[:,0:1],k=200, distance_upper_bound=(2*h), workers=12)
+    nn_dist,index= tree.query(arr1[:,0:1],k=200, distance_upper_bound=(2*h))
     # nn_dist, index = dists[0][:,1]
     # tree = BallTree(arr1[:,0:1], leaf_size=50)  
-    # nn_dist, index = tree.query_radius(arr1[:,0:1], r=2*h)
+    # nn_dist, index = tree.query_radius(X[:1], r=2*h)
     return (nn_dist, index)
 
 def find_distance(arr, x1, z1):
@@ -168,20 +165,19 @@ def multi_fx_kd(count, m_index, m_dist, arr1, arr2):
 
 
     #remove extreme cases
-    # ex = temp_dist1<20
-    # print(ex)
-    # temp_dist1 = temp_dist1[ex]
-    # temp_dist2 = temp_dist2[ex]
-    # ex = temp_dist2<20
-    # temp_dist1 = temp_dist1[ex]
-    # temp_dist2 = temp_dist2[ex]
+    ex = temp_dist1<20
+    temp_dist1 = temp_dist1[ex]
+    temp_dist2 = temp_dist2[ex]
+    ex = temp_dist2<20
+    temp_dist1 = temp_dist1[ex]
+    temp_dist2 = temp_dist2[ex]
     # non_zero = np.flatnonzero(temp_dist1)
     # temp_dist2 = temp_dist2[non_zero]
     # non_zero = np.flatnonzero(temp_dist2)
     # temp_dist1 = temp_dist1[non_zero]
     # temp_dist2 = temp_dist2[non_zero]
     # print(temp_index)
-    # print(temp_dist1)
+    # print(temp_dist2)
     i = np.min(temp_dist1)
     j = np.min(temp_dist2)
     # i = (len(temp_dist1)-np.count_nonzero(temp_dist1))
@@ -207,18 +203,17 @@ def main():
     h = 0.007071
 
     arr1, arr2 = read_csv(first,last)
+    print('read')
     # print(arr1[2:5,:])
     # print(arr1)
 
     # sort on the basis of idp
     arr1 = sort(arr1)
-    # arr1 = arr1[0:len(arr1):2,:]
+    arr1 = arr1[0:len(arr1):5,:]
     np.savetxt("arr1.csv",arr1, delimiter=",")
     arr2 = sort(arr2)
-    # arr2 = arr2[0:len(arr2):2,:]
-    smallest = min(len(arr1),len(arr2))
-    arr1 = arr1[0:smallest,:]
-    arr2 = arr2[0:smallest,:]
+    arr2 = arr2[0:len(arr1):5,:]
+    print('ckdtrr_11')
     # np.savetxt("arr2.csv",arr2, delimiter=",")
     # print(np.max(arr1[:,0]))
     # print(np.shape(arr1))
@@ -235,6 +230,7 @@ def main():
     # print(index[20:21,:])
     # m_dist = np.delete(m_dist,0,1)
     
+    print('counterstuff')
     count=0
     sig = np.zeros([len(arr1),3])
     for i in tqdm(range(len(arr1))):
