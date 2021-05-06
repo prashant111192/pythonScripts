@@ -21,12 +21,11 @@ from scipy.spatial import cKDTree
 def read_csv(first,last):
     #Preparing first/main array
     #0_Pos.x[m];1_Pos.y[m];2_Pos.z[m];3_Idp;4_Vel.x[m/s];5_Vel.y[m/s];6_Vel.z[m/s];7_Rhop[kg/m^3];8_Type;
-    # arr1 = np.loadtxt('Points_000'+str(first)+'.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
-    # arr2 = np.loadtxt('Points_000'+str(last)+'.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
+    arr1 = np.loadtxt('Points_000'+str(first)+'.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
+    arr2 = np.loadtxt('Points_000'+str(last)+'.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
     #picked 0_x,1_z,2_idp and 3_type
-    arr1 = np.loadtxt('withdraft_1104.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
-    # arr2 = np.loadtxt('Points_000'+str(last)+'.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
-    arr2 = np.loadtxt('withdraft_1105.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
+    # arr1 = np.loadtxt('withoutdraft_1104.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
+    # arr2 = np.loadtxt('withoutdraft_1105.csv', dtype=float, delimiter=';', skiprows=4, usecols=(0,2,3,8))
 
     # extract only the fluids
     arr1 = arr1[arr1[:,3]==3]
@@ -125,11 +124,11 @@ def multi_fx(count,arr1,arr2,h,T):
     return (sig)
 
 def cKDTree_method(arr1,h):
-    tree =cKDTree(arr1[:,0:1])
-    nn_dist,index= tree.query(arr1[:,0:1],k=200, distance_upper_bound=(2*h), workers=12)
+    tree =cKDTree(arr1[:,0:2])
+    nn_dist,index= tree.query(arr1[:,0:2],k=20, distance_upper_bound=(2*h), workers=12)
     # nn_dist, index = dists[0][:,1]
-    # tree = BallTree(arr1[:,0:1], leaf_size=50)  
-    # nn_dist, index = tree.query_radius(arr1[:,0:1], r=2*h)
+    # tree = BallTree(arr1[:,0:2], leaf_size=50)  
+    # nn_dist, index = tree.query_radius(arr1[:,0:2], r=2*h)
     return (nn_dist, index)
 
 def find_distance(arr, x1, z1):
@@ -167,14 +166,14 @@ def multi_fx_kd(count, m_index, m_dist, arr1, arr2):
     temp_dist2 = temp_dist2[non_zero]
 
 
-    #remove extreme cases
-    # ex = temp_dist1<20
+    # remove extreme cases
+    ex = temp_dist1<15
     # print(ex)
-    # temp_dist1 = temp_dist1[ex]
-    # temp_dist2 = temp_dist2[ex]
-    # ex = temp_dist2<20
-    # temp_dist1 = temp_dist1[ex]
-    # temp_dist2 = temp_dist2[ex]
+    temp_dist1 = temp_dist1[ex]
+    temp_dist2 = temp_dist2[ex]
+    ex = temp_dist2<15
+    temp_dist1 = temp_dist1[ex]
+    temp_dist2 = temp_dist2[ex]
     # non_zero = np.flatnonzero(temp_dist1)
     # temp_dist2 = temp_dist2[non_zero]
     # non_zero = np.flatnonzero(temp_dist2)
@@ -182,19 +181,25 @@ def multi_fx_kd(count, m_index, m_dist, arr1, arr2):
     # temp_dist2 = temp_dist2[non_zero]
     # print(temp_index)
     # print(temp_dist1)
-    i = np.min(temp_dist1)
-    j = np.min(temp_dist2)
-    # i = (len(temp_dist1)-np.count_nonzero(temp_dist1))
-    # j = (len(temp_dist2)-np.count_nonzero(temp_dist2))
-    # print(np.count_nonzero(temp_dist2))
-    ratio = np.max(temp_dist2/temp_dist1)
+    if np.size(temp_dist1):
+        i = np.min(temp_dist1)
+        j = np.min(temp_dist2)
+        # i = (len(temp_dist1)-np.count_nonzero(temp_dist1))
+        # j = (len(temp_dist2)-np.count_nonzero(temp_dist2))
+        # print(np.count_nonzero(temp_dist2))
+        ratio = np.max(temp_dist2/temp_dist1)
+    else:
+        ratio = 1
+        i=0
+        j=0
     return ratio, i, j
 
 def plot(arr1,sig):
     marker_size=1
     plt.scatter(arr1[:,0],arr1[:,1], marker_size,c=sig[:,0])
     plt.colorbar()
-    plt.show()
+    plt.savefig('ftle.png')
+    # plt.show()
 
 
 
@@ -203,6 +208,7 @@ def main():
     # last = int(input('Enter last file number = '))
     first = 0
     last = 5
+    # T= 0.015
     T= 2.5
     h = 0.007071
 
@@ -213,12 +219,16 @@ def main():
     # sort on the basis of idp
     arr1 = sort(arr1)
     # arr1 = arr1[0:len(arr1):2,:]
-    np.savetxt("arr1.csv",arr1, delimiter=",")
+    # np.savetxt("arr1.csv",arr1, delimiter=",")
     arr2 = sort(arr2)
+    print(np.shape(arr1))
+    print(np.shape(arr2))
     # arr2 = arr2[0:len(arr2):2,:]
     smallest = min(len(arr1),len(arr2))
     arr1 = arr1[0:smallest,:]
     arr2 = arr2[0:smallest,:]
+    print(np.shape(arr1))
+    # print(np.shape(arr2[:,0:1]))
     # np.savetxt("arr2.csv",arr2, delimiter=",")
     # print(np.max(arr1[:,0]))
     # print(np.shape(arr1))
@@ -242,6 +252,8 @@ def main():
         sig[count] = multi_fx_kd(count, m_index, m_dist, arr1, arr2)
         count = count+1
     sig[:,0] = (np.log(np.sqrt(sig[:,0]))/T)
+    # num_cores = multiprocessing.cpu_count()-2
+    # sig = Parallel(n_jobs = num_cores)(delayed(multi_fx_kd)(alpha,m_index,m_dist,arr1,arr2) for alpha in tqdm(range(count)))
     plot(arr1,sig)
     # print(m_index[21,:])
     # print(m_index[20,:])
