@@ -5,6 +5,7 @@ import numpy as np
 import glob
 import math
 import matplotlib.pyplot as plt
+import matplotlib.animation as ani
 import time
 
 # Get number of csv Files
@@ -55,6 +56,22 @@ def velocities(arr):
     arr = np.insert(arr,3,v,axis=1)
     return (arr)
 
+def animated(data):
+    marker_size = 15
+    numframes = data.shape[2]
+    numpoints = data.shape[0]
+    color_data = np.random.random((numframes, numpoints))
+    fig = plt.figure()
+    scat = plt.scatter(data[:,0,0], data[:,1,0], marker_size, c= data[:,4,0])
+    animate = ani.FuncAnimation(fig, update_plot, frames= range(numframes), fargs = (color_data, scat))
+    plt.show()
+
+def update_plot(i, data, scat):
+    scat.set_array(data[i])
+    return scat, 
+    
+    
+
 def plot(data):
     marker_size = 15
     plt.scatter(data[:,0,0], data[:,1,0], marker_size, c= data[:,4,0])
@@ -71,6 +88,7 @@ def plot(data):
     plt.gca().set_aspect('equal')
     plt.show()
     plt.close()
+
 def main():
     set_number = input("Which height is required (Hx)??: ")
     path = os.getcwd()
@@ -78,7 +96,8 @@ def main():
     number_files = find_number_files(path)
     #Final array is a 3d array with (points, data, time steps). The data is as follows; x,y,u,v,vel magnitude, vel degree
     data = read_csv(number_files, set_number, path)
-    plot(data)
+    # plot(data)
+    animated(data)
     # print(data.shape)
 
 
