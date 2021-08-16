@@ -6,6 +6,7 @@ import glob
 import math
 import matplotlib.pyplot as plt
 import matplotlib.animation as ani
+import scipy.interpolate as interp
 import time
 
 # Get number of csv Files
@@ -72,6 +73,13 @@ def update_plot(i, data, scat):
     
     
 
+def interpolate_data(arr):
+    interpolator = interp.CloughTocher2DInterpolator(np.array([x,y]).T, z)
+
+
+
+
+
 def plot(data):
     marker_size = 15
     plt.scatter(data[:,0,0], data[:,1,0], marker_size, c= data[:,4,0])
@@ -96,8 +104,8 @@ def main():
     number_files = find_number_files(path)
     #Final array is a 3d array with (points, data, time steps). The data is as follows; x,y,u,v,vel magnitude, vel degree
     data = read_csv(number_files, set_number, path)
-    # plot(data)
-    animated(data)
+    plot(data)
+    # animated(data)
     # print(data.shape)
 
 
