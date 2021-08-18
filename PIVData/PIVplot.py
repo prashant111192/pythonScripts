@@ -7,6 +7,7 @@ import math
 import matplotlib.pyplot as plt
 import matplotlib.animation as ani
 import scipy.interpolate as interp
+from scipy.spatial import cKDTree
 import time
 
 # Get number of csv Files
@@ -57,24 +58,27 @@ def velocities(arr):
     arr = np.insert(arr,3,v,axis=1)
     return (arr)
 
-def animated(data):
-    marker_size = 15
-    numframes = data.shape[2]
-    numpoints = data.shape[0]
-    color_data = np.random.random((numframes, numpoints))
-    fig = plt.figure()
-    scat = plt.scatter(data[:,0,0], data[:,1,0], marker_size, c= data[:,4,0])
-    animate = ani.FuncAnimation(fig, update_plot, frames= range(numframes), fargs = (color_data, scat))
-    plt.show()
+# def animated(data):
+#     marker_size = 15
+#     numframes = data.shape[2]
+#     numpoints = data.shape[0]
+#     color_data = np.random.random((numframes, numpoints))
+#     fig = plt.figure()
+#     scat = plt.scatter(data[:,0,0], data[:,1,0], marker_size, c= data[:,4,0])
+#     animate = ani.FuncAnimation(fig, update_plot, frames= range(numframes), fargs = (color_data, scat))
+#     plt.show()
 
-def update_plot(i, data, scat):
-    scat.set_array(data[i])
-    return scat, 
+# def update_plot(i, data, scat):
+#     scat.set_array(data[i])
+#     return scat, 
     
-    
+# def cKDTreeMethod(data, num, timestep):
+#     tree = cKDTree(arr[:,])
+#     nn_dist, index = tree.query()
+#     return (nn_dist, index)
 
-def interpolate_data(arr):
-    interpolator = interp.CloughTocher2DInterpolator(np.array([x,y]).T, z)
+# def interpolate_data(arr):
+#     interpolator = interp.CloughTocher2DInterpolator(np.array([x,y]).T, z)
 
 
 
@@ -87,15 +91,7 @@ def plot(data):
     plt.clim(0,0.05)
     plt.gca().set_aspect('equal')
     plt.show()
-
-    plt.close()
-    time.sleep(0.5)
-    plt.scatter(data[:,0,60], data[:,1,60], marker_size, c= data[:,4,60])
-    plt.colorbar()
-    plt.clim(0,0.05)
-    plt.gca().set_aspect('equal')
-    plt.show()
-    plt.close()
+    return 
 
 def main():
     set_number = input("Which height is required (Hx)??: ")
