@@ -35,23 +35,36 @@ def read_csv(number_files, set_number, path):
 
     return(arr)
 
-def read_csv() -> Tuple["ndarray", "ndarray"]:
+def read_csv_2(path):
     """Read multiple csv files."""
     # 0_Pos.x[m];1_Pos.y[m];2_Pos.z[m];3_Idp;4_Vel.x[m/s];5_Vel.y[m/s];6_Vel.z[m/s];7_Rhop[kg/m^3];8_Type;
     root_dir = path
-    arr = np.loadtxt(root_dir+'csv_0000.csv', dtype=float, delimiter=';', skiprows=5, usecols=(0, 1, 2, 3, 4, 5, 6, 8))
+    arr = np.loadtxt(root_dir+'/csv_0400.csv', dtype=float, delimiter=';', skiprows=5, usecols=(0, 1, 2, 3, 4, 5, 6, 8))
     # arr1 = np.loadtxt(root_dir+'csv_0400.csv', dtype=float, delimiter=';', skiprows=5, usecols=(0, 1, 2, 3, 4, 5, 6, 8))
 
-    # picked 0_x,1_y,2_z, 3_idp 4_vx, 5vy, 6_vz, type
+    # picked 0_x,1_y,2_z, 3_idp 4_vx, 5vy, 6_vz, 7_type
     # extract only the fluids
     low = min(arr[:,0])
     arr = arr[arr[:, 7] == 3]
+    # picked 0_x,1_y,2_z, 3_idp 4_vx, 5vy, 6_vz
     arr = np.delete(arr, 7, 1)
+    arr = vel(arr)
     # arr2 = arr2[arr2[:, 7] == 3]
     # arr2 = np.delete(arr2, 7, 1)
     return (arr, low)
 
         
+# adding vel magnitude column
+def vel(arr):
+    u = arr[:,4]
+    v = arr[:,6]
+    w = arr[:,6]
+    sqrt_vec = np.vectorize(math.sqrt)
+    vel_mag = sqrt_vec((u*u) + (v*v) + (w*w))
+    vel_mag = vel_mag.reshape(len(vel_mag),1)
+    arr = np.append(arr, vel_mag, axis=1)
+    return (arr)
+
 #reading the csv and computing the directional velocites 
 def loadAndVel(name_file):
     arr = np.loadtxt(name_file, dtype=float, delimiter=',', skiprows=3, usecols=(0,1,2,3,5,10))
@@ -73,7 +86,10 @@ def velocities(arr):
     arr = np.insert(arr,3,v,axis=1)
     return (arr)
 
-def closest_point_distance(piv_arr, sph_arr):
+def closest_point_distance(piv_arr, sph_arr, height):
+    height = np.ones(len(piv_arr))*height
+    height = height.reshape(len(piv_arr),1)
+    piv_arr = np.append(piv_arr, height, axis = 1)
     closest_index = distance.cdist(piv_arr, sph_arr, metric='euclidean').argmin()
     return closest_index
 
@@ -115,16 +131,22 @@ def plot(x,y,c_):
     plt.colorbar()
     # plt.clim(0,0.05)
     plt.gca().set_aspect('equal')
-    plt.show()
+    plt.savefig("./fig.png")
+    # plt.show()
     return 
 
 def main():
     set_number = input("Which height is required (Hx)??: ")
     path = os.getcwd()
-    path = str(path+"/H"+str(set_number)+"/")
+    path_file= str(path+"/H"+str(set_number)+"/")
     number_files = find_number_files(path)
     #Final array is a 3d array with (points, data, time steps). The data is as follows; x,y,u,v,vel magnitude, vel degree
-    data = read_csv(number_files, set_number, path)
+    data = read_csv(number_files, set_number, path_file)
+    sph_arr, low = read_csv_2(path)
+    height = 10
+    shifted_data= data
+    shifted_data[:, 1]=-pos
+    closest_index_sph = closest_point_distance(data, sph_arr, height)
     plot(data[:,0,0], data[:,1,0], data[:,4,0])
     # print(data.shape)
 
