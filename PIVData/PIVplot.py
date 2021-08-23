@@ -27,10 +27,10 @@ def read_csv(number_files, set_number, path):
     # +1 becuase range does not iterate obver the last value
     for i in range(2,number_files+1):
         name_file=(path+'H'+str(set_number)+'_'+str(f"{(i):04d}")+'.txt')
-        # arr_temp = np.loadtxt(name_file, dtype=float, delimiter=',', skiprows=3, usecols=(0,1,5,10))
+        # arr_temp = np.loadtxt(name_file, dtype=float, delimiter=',', skiprows=3, usecols=(0,1,5))
         arr_temp = loadAndVel(name_file)
         arr_temp = arr_temp.reshape(arr_temp.shape[0], arr_temp.shape[1],1)
-        # x [m],y [m],u [m/s],v [m/s],vorticity [1/s],magnitude [m/s],divergence [1/s],dcev [1],simple shear [1/s],simple strain [1/s],vector direction [degrees]
+        # 0x [m],1y [m],2u [m/s],3v [m/s],4vorticity [1/s],5magnitude [m/s],6divergence [1/s],7dcev [1],8simple shear [1/s],9simple strain [1/s],10vector direction [degrees]
         arr = np.append(arr, arr_temp, axis = 2)
 
     return(arr)
@@ -41,6 +41,7 @@ def read_csv_2(path):
     root_dir = path
     arr = np.loadtxt(root_dir+'/csv_0400.csv', dtype=float, delimiter=';', skiprows=5, usecols=(0, 1, 2, 3, 4, 5, 6, 8))
     # arr1 = np.loadtxt(root_dir+'csv_0400.csv', dtype=float, delimiter=';', skiprows=5, usecols=(0, 1, 2, 3, 4, 5, 6, 8))
+    # 1Pos.x[m];Pos.y[m];Pos.z[m];Idp;Vel.x[m/s];Vel.y[m/s];Vel.z[m/s];Rhop[kg/m^3];Type;
 
     # picked 0_x,1_y,2_z, 3_idp 4_vx, 5vy, 6_vz, 7_type
     # extract only the fluids
@@ -67,7 +68,7 @@ def vel(arr):
 
 #reading the csv and computing the directional velocites 
 def loadAndVel(name_file):
-    arr = np.loadtxt(name_file, dtype=float, delimiter=',', skiprows=3, usecols=(0,1,2,3,5,10))
+    arr = np.loadtxt(name_file, dtype=float, delimiter=',', skiprows=3, usecols=(0,1,2,3,5))
     # print(arr.shape)
     arr = arr[~np.isnan(arr).any(axis=1)]
     # print(arr.shape)
@@ -89,8 +90,12 @@ def velocities(arr):
 def closest_point_distance(piv_arr, sph_arr, height):
     height = np.ones(len(piv_arr))*height
     height = height.reshape(len(piv_arr),1)
-    piv_arr = np.append(piv_arr, height, axis = 1)
-    closest_index = distance.cdist(piv_arr, sph_arr, metric='euclidean').argmin()
+    # piv_arr = np.squeeze(piv_arr)
+    # height = np.tile(height, [])
+    # adding heights to piv data i.e., making them 3d
+    piv_arr = np.insert(piv_arr,2, height, axis = 1) 
+    # piv_arr = np.append(piv_arr, height, axis = 1) 
+    closest_index = distance.cdist(piv_arr[:,0:3,0], sph_arr[:, 0:3], metric='euclidean').argmin(1)
     return closest_index
 
 def closest_point_kdtree(piv_arr, sph_arr):
@@ -120,35 +125,65 @@ def closest_point_kdtree(piv_arr, sph_arr):
 # def interpolate_data(arr):
 #     interpolator = interp.CloughTocher2DInterpolator(np.array([x,y]).T, z)
 
-def subtract_plt(sph_arr, piv_arr, i):
-    sub_array = piv_arr[:, vel]-sph_arr[i, vel_2]
-    percent_arr = (sub_array*100)/piv_arr
-    return percent_arr
+def subtract_plt(piv_arr,sph_arr, vel_piv_index, vel_sph_index, closest_index_sph):
+    sub_array = abs(piv_arr[:, vel_piv_index, 0]-sph_arr[closest_index_sph, vel_sph_index])
+    percent_arr = (sub_array*100)/piv_arr[:,vel_piv_index,0]
+    return percent_arr, sub_array
 
-def plot(x,y,c_):
+def plot_graph(x,y,c_, name, title):
     marker_size = 15
     plt.scatter(x, y, marker_size, c= c_)
     plt.colorbar()
-    # plt.clim(0,0.05)
-    plt.gca().set_aspect('equal')
-    plt.savefig("./fig.png")
+    plt.clim(0,100)
+    # plt.gca().set_aspect('equal')
+    plt.savefig("./figs/"+title+str(name)+".png")
+    plt.clf()
     # plt.show()
     return 
 
+def plot_2_together(piv_arr, sph_arr, closest):
+    plt.scatter(sph_arr[:,0], sph_arr[:,1],marker = '.' )
+    plt.scatter(sph_arr[closest,0], sph_arr[closest,1], marker= ',')
+    plt.scatter(piv_arr[:,0,0], piv_arr[:,1,0])
+    # plt.savefig("./fig.png")
+    plt.show()
+    return
+    
+
+
+
 def main():
-    set_number = input("Which height is required (Hx)??: ")
+
     path = os.getcwd()
-    path_file= str(path+"/H"+str(set_number)+"/")
-    number_files = find_number_files(path)
-    #Final array is a 3d array with (points, data, time steps). The data is as follows; x,y,u,v,vel magnitude, vel degree
-    data = read_csv(number_files, set_number, path_file)
-    sph_arr, low = read_csv_2(path)
-    height = 10
-    shifted_data= data
-    shifted_data[:, 1]=-pos
-    closest_index_sph = closest_point_distance(data, sph_arr, height)
-    plot(data[:,0,0], data[:,1,0], data[:,4,0])
-    # print(data.shape)
+    # set_number = input("Which height is required (Hx)??: ")
+    set_number = [0,2,3,4,5,6,7,8,9,10,11,12]
+    heights_array = [0.105,.115,.125,.150,.160,.170,.200,.210,.220,.245,.255,.265]
+    for i in range(12):
+        path_file= str(path+"/H"+str(set_number[i])+"/")
+        number_files = find_number_files(path_file)
+        #Final array is a 3d array with (points, data, time steps). The data is as follows; x,y,u,v,vel magnitude, vel degree
+        data = read_csv(number_files, set_number[i], path_file)
+        pos_x_piv_min = min(data[:, 0, 0])
+        pos_x_piv_max = max(data[:, 0, 0])
+        sph_arr, low = read_csv_2(path)
+        posy = min(sph_arr[:,1])
+        posx = min(sph_arr[:,0])
+        height = min(sph_arr[:,2])+ heights_array[i]
+        shifted_data= np.copy(data)
+        shifted_data[:, 1,:]+=posy*0.9
+        shifted_data[:,0] = shifted_data[:,0]-pos_x_piv_min-((pos_x_piv_max - pos_x_piv_min)/2)
+        # shifted_data[:, 0]+=posx/2
+        closest_index_sph = closest_point_distance(shifted_data, sph_arr, height)
+        percent, diff=subtract_plt(shifted_data, sph_arr, 4,7, closest_index_sph)
+        # plot_graph(data[:,0,0], data[:,1,0], data[:,4,0])
+        plot_2_together(shifted_data, sph_arr, closest_index_sph)
+        plot_2_together(data, sph_arr, closest_index_sph)
+        # plot_graph(data[:,0,0], data[:,1,0], percent, heights_array[i], "percent")
+        print (np.average(percent))
+        # plot_graph(data[:,0,0], data[:,1,0], diff, heights_array[i], "difference")
+        # print(data.shape)
+
+    return
 
 
 if __name__=="__main__":
