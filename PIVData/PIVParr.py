@@ -212,7 +212,7 @@ def main() -> None:
     set_number = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     # 12 fucking arrays...dont have to count all the time
     heights_array = [.105, .115, .125, .150, .160, .170, .200, .210, .220, .245, .255, .265]
-    y_shift_array = np.linspace(1,0.7,100)
+    y_shift_array = np.linspace(1,0.7,10)
     average_percent_arr = np.zeros((len(heights_array), len(y_shift_array)))
     average_percent_arr = [pool.apply(par, args=(path, set_number, heights_array, y_shift_array, average_percent_arr, idy)) for idy in range(len(y_shift_array))]
     pool.close()

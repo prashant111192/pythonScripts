@@ -173,12 +173,14 @@ def quartile_range(percent: "ndarray") -> "ndarray":
     return outliers_idx
 
 def par(path, set_number, heights_array, y_shift_array, idy):
-    average_percent_temp = np.zeros(len(heights_array))
+    average_percent_temp = np.zeros(len(heights_array)*2)
+    average_percent_no_outliers_temp = np.zeros(len(heights_array))
     for idx in range(12):
         path_file = f"{path}/H{set_number[idx]}/"
         number_files = find_number_files(path_file)
         # Final array is a 3d array with (points, data, time steps). The data is as follows; x,y,u,v,vel magnitude, vel degree
-        data = read_csv(number_files, set_number[idx], path_file)
+        data1 = read_csv(number_files, set_number[idx], path_file)
+        data = np.mean(data1,axis=2)
         pos_x_piv_min = min(data[:, 0, 0])
         pos_x_piv_max = max(data[:, 0, 0])
         sph_arr, low = read_csv_2(path)
@@ -200,11 +202,17 @@ def par(path, set_number, heights_array, y_shift_array, idy):
         # plot_graph(data[~outliers_idx,0,0], data[~outliers_idx,1,0], percent[~outliers_idx], str(heights_array[idx]), str(y_shift_array[idy]), "percent")
         # plot_histogram(percent, heights_array[idx], "histogram")
         average_percent = np.average(percent)
-        # print(average_percent)
+        average_percent_no_outliers = np.average(percent[~outliers_idx])
+        # print(average_percent.shape)
+        # print(average_percent_no_outliers.shape)
         average_percent_temp[idx] = average_percent
+        average_percent_no_outliers_temp[idx] = average_percent_no_outliers
+        # print(average_percent_no_outliers_temp)
 
         # print (average_percent_temp.shape)
-        average_percent_return = average_percent_temp.reshape(1,len(average_percent_temp))
+        # average_percent_return = average_percent_temp.reshape(1,len(average_percent_temp))
         # print (average_percent_return.shape)
+    
+    average_percent_temp[len(heights_array):] = average_percent_no_outliers_temp
 
     return average_percent_temp
