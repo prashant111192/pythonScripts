@@ -32,9 +32,10 @@ path = os.getcwd()
 # set_number = input("Which height is required (Hx)??: ")
 set_number = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 # 12 fucking arrays...dont have to count all the time
-nO_y_shifts = 15
+nO_y_shifts = 2
 heights_array = [.105, .115, .125, .150, .160, .170, .200, .210, .220, .245, .255, .265]
-y_shift_array = np.linspace(1.15,0.85,nO_y_shifts)
+# y_shift_array = np.linspace(1.01,0.99,nO_y_shifts)
+y_shift_array = np.array([-.09833, -.10244, -.10584, -.11152, -.11331, -.11271, -.11165, -.10954, -.10754, -.09875, -.09395, -.08831])
 sph_arr, low = par.read_csv_2(path)
 # average_percent_arr = np.zeros((len(heights_array), len(y_shift_array)))
 # average_percent_arr_no_outliers = np.zeros((len(heights_array), len(y_shift_array)))

@@ -182,11 +182,12 @@ def main() -> None:
     set_number = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     # 12 fucking arrays...dont have to count all the time
     heights_array = [.105, .115, .125, .150, .160, .170, .200, .210, .220, .245, .255, .265]
-    y_shift_array = np.linspace(1,0.7,10)
+    # y_shift_array = np.linspace(1,0.7,10)
+    y_shift_array = [1]
     average_percent_arr = np.zeros((len(heights_array), len(y_shift_array)))
 
     for idy in range(len(y_shift_array)):
-        for idx in range(12):
+        for idx in range(1):
             path_file = f"{path}/H{set_number[idx]}/"
             number_files = find_number_files(path_file)
             # Final array is a 3d array with (points, data, time steps). The data is as follows; x,y,u,v,vel magnitude, vel degree
