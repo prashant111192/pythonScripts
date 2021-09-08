@@ -144,6 +144,20 @@ def plot_graph(x: "ndarray", y: "ndarray", c_: "ndarray", name: str, height: str
     plt.clf()
     # plt.show()
 
+def plot_yz(piv_arr: "ndarray", sph_arr: "ndarray", name: str, height: str, title: str) -> None:
+    """Plot yz Positions."""
+    fig = plt.figure()
+    # ax = fig.add_subplot(projection='3d')
+    ax = plt.axes(projection='3d')
+    # ax = Axes3D(fig)
+    ax.scatter(sph_arr[:,0], sph_arr[:,1], sph_arr[:,2], s = 0.01)
+    ax.scatter(piv_arr[:,0], piv_arr[:,1],piv_arr[:,2], s = 0.1)
+    # plt.gca().set_aspect("equal")
+    plt.grid()
+    # plt.savefig(f"./figs2/{title}{name}{height}.png")
+    plt.show()
+    plt.clf()
+
 
 def plot_2_together(piv_arr: "ndarray", sph_arr: "ndarray", closest: "ndarray", name: str, height: str, title: str) -> None:
     """TODO."""
@@ -222,8 +236,11 @@ def par(path, set_number, heights_array, y_shift_array, idy,sph_arr):
     posx = min(sph_arr[:, 0])
     height = min(sph_arr[:, 2]) + heights_array[idx]
     shifted_data = np.copy(data)
-    shifted_data[:, 1] += pos_y_piv_min + y_shift_array[idy]
+    shifted_data[:, 1] -= pos_y_piv_min - y_shift_array[idy]
+    print(pos_y_piv_min)
+    print(y_shift_array[idy])
     shifted_data[:, 0] = shifted_data[:, 0] - pos_x_piv_min - (pos_x_piv_max - pos_x_piv_min) / 2
+    # shifted_data = shifted_data[]
     # shifted_data[:, 0] += posx / 2
     closest_index_sph, shifted_height= closest_point_distance(shifted_data, sph_arr, height)
     percent, diff = subtract_plt(shifted_data, sph_arr, 4, 7, closest_index_sph)
@@ -233,12 +250,13 @@ def par(path, set_number, heights_array, y_shift_array, idy,sph_arr):
     outliers_idx = quartile_range(percent)
     # print(sum(outliers_idx))
     closest_pts = np.copy(sph_arr[closest_index_sph, :])
-    print(closest_pts.shape)
+    # print(closest_pts.shape)
     # plot_2_together(shifted_height, closest_pts, None, str(heights_array[idx]), str(y_shift_array[idy]), "angle")
     # plot_2_together(shifted_height, sph_arr, None, str(heights_array[idx]), str(y_shift_array[idy]), "check")
     plot_2_together(shifted_height, closest_pts, outliers_idx, str(heights_array[idx]), str(y_shift_array[idy]), "outliers")
     # plot_graph(data[~outliers_idx,0,0], data[~outliers_idx,1,0], percent[~outliers_idx], str(heights_array[idx]), str(y_shift_array[idy]), "percent")
-    # plot_histogram(percent, heights_array[idx], "histogram")
+    plot_histogram(percent, heights_array[idx], "histogram")
+    # plot_yz(shifted_height, sph_arr, str(heights_array[idx]), str(y_shift_array[idy]), "2d_yz")
     average_percent = np.average(percent)
     average_percent_no_outliers = np.average(percent[~outliers_idx])
     average_stdev_no_outliers = stats.stdev(percent[~outliers_idx])
@@ -247,7 +265,7 @@ def par(path, set_number, heights_array, y_shift_array, idy,sph_arr):
     average_percent_temp[idx] = average_percent
     average_percent_no_outliers_temp[idx] = average_percent_no_outliers
     average_stdev_no_outliers_temp[idx] = average_stdev_no_outliers
-    # print(average_percent_no_outliers_temp)
+    print(average_percent_no_outliers_temp)
 
     # print (average_percent_temp.shape)
     # average_percent_return = average_percent_temp.reshape(1,len(average_percent_temp))

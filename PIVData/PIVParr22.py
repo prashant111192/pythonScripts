@@ -58,7 +58,7 @@ np.savetxt(f"./figs2/stdev_no_outliers.csv",  average_percent_arr[len(heights_ar
 par.box_plot(average_percent_arr[:len(heights_array),:],nO_y_shifts, label, "WithOutliers")
 par.box_plot(average_percent_arr[len(heights_array):len(heights_array)*2,:],nO_y_shifts, label, "WithoutOutliers")
 # np.savetxt(f"./figs2/percent.csv",  average_percent_arr, header = ([y_shift_array]),delimiter=',')
-    # plot_graph(data[:,0,0], data[:,1,0], diff, heights_array[i], "difference")
+# plot_graph(data[:,0,0], data[:,1,0], diff, heights_array[i], "difference")
     # print(data.shape)
 
 
