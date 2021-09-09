@@ -216,17 +216,20 @@ def quartile_range(percent: "ndarray") -> "ndarray":
     outliers_idx = (percent < (q1 - 1.5 * IQR)) | (percent > (q3 + 1.5 * IQR))
     return outliers_idx
 
-def par(path, set_number, heights_array, y_shift_array, idy,sph_arr):
+def par(path, set_number, heights_array, y_shift_array, idx,sph_arr):
     average_percent_temp = np.zeros(len(heights_array)*3)
     average_percent_no_outliers_temp = np.zeros(len(heights_array))
     average_stdev_no_outliers_temp = np.zeros(len(heights_array))
-    idx = idy
     # for idx in range(12):
     path_file = f"{path}/H{set_number[idx]}/"
     number_files = find_number_files(path_file)
     # Final array is a 3d array with (points, data, time steps). The data is as follows; x,y,u,v,vel magnitude, vel degree
-    data1 = read_csv(number_files, set_number[idx], path_file)
-    data = np.mean(data1,axis=2)
+    data = read_csv(number_files, set_number[idx], path_file)
+    #Averaged timesteps
+    data = np.mean(data,axis=2)
+    #second Timestep
+    # data = data[:,:,1]
+
     pos_x_piv_min = min(data[:, 0])
     pos_x_piv_max = max(data[:, 0])
     pos_y_piv_min = min(data[:, 1])
@@ -236,9 +239,9 @@ def par(path, set_number, heights_array, y_shift_array, idy,sph_arr):
     posx = min(sph_arr[:, 0])
     height = min(sph_arr[:, 2]) + heights_array[idx]
     shifted_data = np.copy(data)
-    shifted_data[:, 1] -= pos_y_piv_min - y_shift_array[idy]
+    shifted_data[:, 1] -= pos_y_piv_min - y_shift_array[idx]
     print(pos_y_piv_min)
-    print(y_shift_array[idy])
+    print(y_shift_array[idx])
     shifted_data[:, 0] = shifted_data[:, 0] - pos_x_piv_min - (pos_x_piv_max - pos_x_piv_min) / 2
     # shifted_data = shifted_data[]
     # shifted_data[:, 0] += posx / 2
@@ -246,17 +249,17 @@ def par(path, set_number, heights_array, y_shift_array, idy,sph_arr):
     percent, diff = subtract_plt(shifted_data, sph_arr, 4, 7, closest_index_sph)
     # plot_graph(data[:, 0, 0], data[:, 1, 0], data[:, 4, 0])
     # plot_graph(shifted_height[:, 0, 0], shifted_height[:,1,0], shifted_height[:,4,0])
-    # plot_2_together(data, sph_arr, None, str(heights_array[idx]), str(y_shift_array[idy]), "check")
+    # plot_2_together(data, sph_arr, None, str(heights_array[idx]), str(y_shift_array[idx]), "check")
     outliers_idx = quartile_range(percent)
     # print(sum(outliers_idx))
     closest_pts = np.copy(sph_arr[closest_index_sph, :])
     # print(closest_pts.shape)
-    # plot_2_together(shifted_height, closest_pts, None, str(heights_array[idx]), str(y_shift_array[idy]), "angle")
-    # plot_2_together(shifted_height, sph_arr, None, str(heights_array[idx]), str(y_shift_array[idy]), "check")
-    plot_2_together(shifted_height, closest_pts, outliers_idx, str(heights_array[idx]), str(y_shift_array[idy]), "outliers")
-    # plot_graph(data[~outliers_idx,0,0], data[~outliers_idx,1,0], percent[~outliers_idx], str(heights_array[idx]), str(y_shift_array[idy]), "percent")
+    # plot_2_together(shifted_height, closest_pts, None, str(heights_array[idx]), str(y_shift_array[idx]), "angle")
+    # plot_2_together(shifted_height, sph_arr, None, str(heights_array[idx]), str(y_shift_array[idx]), "check")
+    plot_2_together(shifted_height, closest_pts, outliers_idx, str(heights_array[idx]), str(y_shift_array[idx]), "outliers")
+    # plot_graph(data[~outliers_idx,0,0], data[~outliers_idx,1,0], percent[~outliers_idx], str(heights_array[idx]), str(y_shift_array[idx]), "percent")
     plot_histogram(percent, heights_array[idx], "histogram")
-    # plot_yz(shifted_height, sph_arr, str(heights_array[idx]), str(y_shift_array[idy]), "2d_yz")
+    # plot_yz(shifted_height, sph_arr, str(heights_array[idx]), str(y_shift_array[idx]), "2d_yz")
     average_percent = np.average(percent)
     average_percent_no_outliers = np.average(percent[~outliers_idx])
     average_stdev_no_outliers = stats.stdev(percent[~outliers_idx])

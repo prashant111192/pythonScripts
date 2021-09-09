@@ -21,26 +21,21 @@ if TYPE_CHECKING:
 start_time = time.time()
 print(start_time)
 
+
 pool = mp.Pool(mp.cpu_count()) 
-
-
-
-
 
 
 path = os.getcwd()
 # set_number = input("Which height is required (Hx)??: ")
 set_number = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 # 12 fucking arrays...dont have to count all the time
-nO_y_shifts = 2
 heights_array = [.105, .115, .125, .150, .160, .170, .200, .210, .220, .245, .255, .265]
-# y_shift_array = np.linspace(1.01,0.99,nO_y_shifts)
 y_shift_array = np.array([-.09833, -.10244, -.10584, -.11152, -.11331, -.11271, -.11165, -.10954, -.10754, -.09875, -.09395, -.08831])
 sph_arr, low = par.read_csv_2(path)
 # average_percent_arr = np.zeros((len(heights_array), len(y_shift_array)))
 # average_percent_arr_no_outliers = np.zeros((len(heights_array), len(y_shift_array)))
 # average_percent_arr = np.zeros((len(heights_array), len(y_shift_array)))
-average_percent_arr= [pool.apply(par.par, args=(path, set_number, heights_array, y_shift_array, idy, sph_arr)) for idy in range(len(y_shift_array))]
+average_percent_arr= [pool.apply(par.par, args=(path, set_number, heights_array, y_shift_array, idx, sph_arr)) for idx in range(len(y_shift_array))]
 # average_percent_arr, average_percent_arr_no_outliers= [pool.apply(par.par, args=(path, set_number, heights_array, y_shift_array, idy)) for idy in range(len(y_shift_array))]
 pool.close()
 average_percent_arr = np.transpose(average_percent_arr)
@@ -55,8 +50,6 @@ label = ([str("{:.2f}".format(yy)) for yy in y_shift_array])
 np.savetxt(f"./figs2/percent.csv",  average_percent_arr[:len(heights_array),:],header = ','.join([str(yy) for yy in y_shift_array]),comments='', delimiter=',')
 np.savetxt(f"./figs2/percent_no_outliers.csv",  average_percent_arr[len(heights_array):len(heights_array)*2,:],header = ','.join([str(yy) for yy in y_shift_array]),comments='', delimiter=',')
 np.savetxt(f"./figs2/stdev_no_outliers.csv",  average_percent_arr[len(heights_array)*2:,:],header = ','.join([str(yy) for yy in y_shift_array]),comments='', delimiter=',')
-par.box_plot(average_percent_arr[:len(heights_array),:],nO_y_shifts, label, "WithOutliers")
-par.box_plot(average_percent_arr[len(heights_array):len(heights_array)*2,:],nO_y_shifts, label, "WithoutOutliers")
 # np.savetxt(f"./figs2/percent.csv",  average_percent_arr, header = ([y_shift_array]),delimiter=',')
 # plot_graph(data[:,0,0], data[:,1,0], diff, heights_array[i], "difference")
     # print(data.shape)
