@@ -216,8 +216,8 @@ def quartile_range(percent: "ndarray") -> "ndarray":
     outliers_idx = (percent < (q1 - 1.5 * IQR)) | (percent > (q3 + 1.5 * IQR))
     return outliers_idx
 
-def par(path, set_number, heights_array, y_shift_array, idx,sph_arr):
-    average_percent_temp = np.zeros(len(heights_array)*3)
+def main_2(path, set_number, heights_array, y_shift_array, idx,sph_arr):
+    average_percent_temp = np.zeros(1*3)
     average_percent_no_outliers_temp = np.zeros(len(heights_array))
     average_stdev_no_outliers_temp = np.zeros(len(heights_array))
     # for idx in range(12):
@@ -235,13 +235,13 @@ def par(path, set_number, heights_array, y_shift_array, idx,sph_arr):
     pos_y_piv_min = min(data[:, 1])
     # sph_arr, low = read_csv_2(path)
     posy = min(sph_arr[:, 1])
-    print(posy)
+    # print(posy)
     posx = min(sph_arr[:, 0])
     height = min(sph_arr[:, 2]) + heights_array[idx]
     shifted_data = np.copy(data)
     shifted_data[:, 1] -= pos_y_piv_min - y_shift_array[idx]
-    print(pos_y_piv_min)
-    print(y_shift_array[idx])
+    # print(pos_y_piv_min)
+    # print(y_shift_array[idx])
     shifted_data[:, 0] = shifted_data[:, 0] - pos_x_piv_min - (pos_x_piv_max - pos_x_piv_min) / 2
     # shifted_data = shifted_data[]
     # shifted_data[:, 0] += posx / 2
@@ -265,16 +265,17 @@ def par(path, set_number, heights_array, y_shift_array, idx,sph_arr):
     average_stdev_no_outliers = stats.stdev(percent[~outliers_idx])
     # print(average_percent.shape)
     # print(average_percent_no_outliers.shape)
-    average_percent_temp[idx] = average_percent
-    average_percent_no_outliers_temp[idx] = average_percent_no_outliers
-    average_stdev_no_outliers_temp[idx] = average_stdev_no_outliers
-    print(average_percent_no_outliers_temp)
+    average_percent_temp = ([idx, average_percent, average_percent_no_outliers, average_stdev_no_outliers])
+    # average_percent_temp[idx] = average_percent
+    # average_percent_no_outliers_temp[idx] = average_percent_no_outliers
+    # average_stdev_no_outliers_temp[idx] = average_stdev_no_outliers
+    # print(average_percent_no_outliers_temp)
 
     # print (average_percent_temp.shape)
     # average_percent_return = average_percent_temp.reshape(1,len(average_percent_temp))
     # print (average_percent_return.shape)
     
-    average_percent_temp[len(heights_array):(len(heights_array)*2)] = average_percent_no_outliers_temp
-    average_percent_temp[len(heights_array)*2:] = average_stdev_no_outliers_temp
+    # average_percent_temp[len(heights_array):(len(heights_array)*2)] = average_percent_no_outliers_temp
+    # average_percent_temp[len(heights_array)*2:] = average_stdev_no_outliers_temp
 
     return average_percent_temp
