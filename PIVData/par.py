@@ -114,9 +114,10 @@ def closest_point_kdtree(piv_arr: "ndarray", sph_arr: "ndarray") -> "ndarray":
 #     interpolator = interp.CloughTocher2DInterpolator(np.array([x,y]).T, z)
 
 
-def subtract_plt(piv_arr: "ndarray", sph_arr: "ndarray", vel_piv_index: int, vel_sph_index: int, closest_index_sph: "ndarray") -> Tuple["ndarray", "ndarray"]:
+def subtract_plt(piv_arr: "ndarray", sph_arr: "ndarray", vel_piv_index: int, vel_sph_index: int, closest_index_sph: "ndarray", vel) -> Tuple["ndarray", "ndarray"]:
     """TODO."""
-    sub_array = abs(piv_arr[:, vel_piv_index] - sph_arr[closest_index_sph, vel_sph_index])
+    sub_array = abs(piv_arr[:, vel_piv_index] - vel[:])
+    # sub_array = abs(piv_arr[:, vel_piv_index] - sph_arr[closest_index_sph, vel_sph_index])
     # sub_array = (piv_arr[:, vel_piv_index] - sph_arr[closest_index_sph, vel_sph_index])
     percent_arr = (sub_array * 100) / piv_arr[:, vel_piv_index]
     vel_mean = stats.mean(sub_array)
@@ -133,7 +134,8 @@ def plot_histogram(c_: "ndarray", name: str, title: str) -> None:
     # plt.hist(c_,)
     # plt.show()
     plt.title(f"{title}_height_{str(name)}")
-    plt.savefig(f"./figs2/{title}{str(name)}.png")
+    plt.ylim(0,180)
+    plt.savefig(f"./figs2/{title}_{str(name)}.png")
     plt.clf()
 
 
@@ -221,14 +223,25 @@ def quartile_range(percent: "ndarray") -> "ndarray":
 
 def cKDTree_method(arr,h):
     tree =cKDTree(arr[:,0:2])
-    nn_dist,index= tree.query(arr[:,0:2],k=20, distance_upper_bound=(2*h), workers=12)
+    nn_dist,index= tree.query(arr[:,0:2],k=10, distance_upper_bound=(0.5*h), workers=12)
     # nn_dist, index = dists[0][:,1]
     # tree = BallTree(arr1[:,0:2], leaf_size=50)  
     # nn_dist, index = tree.query_radius(arr1[:,0:2], r=2*h)
     return (nn_dist, index)
 
+def vel_kernel(sph_arr, closest, index):
 
-def main_2(path, set_number, sph_y0, heights_array, y_shift_array, idx,sph_arr0, sph_arr1, sph_arr2, sph_arr3):
+    vel = np.zeros(len(closest))
+    # vel = np.average(sph_arr[index[closest],7])
+    # print(index[closest[1]])
+    # print(index.shape)
+    for i in range(len(closest)):
+        vel[i] = np.average(sph_arr[[index[closest[i]]],7])
+        # print(vel.shape)
+    return vel
+
+
+def main_2(path, set_number, sph_y0, heights_array, y_shift_array, idx,sph_arr0, sph_arr1, sph_arr2, sph_arr3, index0, index1, index2, index3):
     average_percent_temp = np.zeros(4)
     # for idx in range(12):
     path_file = f"{path}/H{set_number[idx]}/"
@@ -260,14 +273,22 @@ def main_2(path, set_number, sph_y0, heights_array, y_shift_array, idx,sph_arr0,
     for sph_id in range(4):
         if sph_id==0:
             sph_arr = sph_arr0
+            index = index0
         elif sph_id ==1:
             sph_arr = sph_arr1
+            index = index1
         elif sph_id ==2:
             sph_arr = sph_arr2
+            index = index2
         elif sph_id ==3:
             sph_arr = sph_arr3
+            index = index3
         closest_index_sph, shifted_height= closest_point_distance(shifted_data, sph_arr, height)
-        percent[:,sph_id], diff = subtract_plt(shifted_data, sph_arr, 4, 7, closest_index_sph)
+        
+        vel_ave = np.zeros(len(closest_index_sph))
+        vel_ave = vel_kernel(sph_arr, closest_index_sph, index)
+        # print(len(vel_ave)-len(closest_index_sph))
+        percent[:,sph_id], diff = subtract_plt(shifted_data, sph_arr, 4, 7, closest_index_sph, vel_ave)
         # plot_graph(data[:, 0, 0], data[:, 1, 0], data[:, 4, 0])
         # plot_graph(shifted_height[:, 0, 0], shifted_height[:,1,0], shifted_height[:,4,0])
         # plot_2_together(data, sph_arr, None, str(heights_array[idx]), str(y_shift_array[idx]), "check")
@@ -277,7 +298,7 @@ def main_2(path, set_number, sph_y0, heights_array, y_shift_array, idx,sph_arr0,
         # print(closest_pts.shape)
         # plot_2_together(shifted_height, closest_pts, None, str(heights_array[idx]), str(y_shift_array[idx]), "angle")
         # plot_2_together(shifted_height, sph_arr, None, str(heights_array[idx]), str(y_shift_array[idx]), "check")
-        plot_2_together(shifted_height, closest_pts, outliers_idx, str(heights_array[idx]), str(y_shift_array[idx]), "outliers")
+        # plot_2_together(shifted_height, closest_pts, outliers_idx, str(heights_array[idx]), str(y_shift_array[idx]), "outliers")
         # plot_graph(data[~outliers_idx,0,0], data[~outliers_idx,1,0], percent[~outliers_idx], str(heights_array[idx]), str(y_shift_array[idx]), "percent")
     
     plot_histogram(percent, heights_array[idx], f"sph{sph_id}_histogram")

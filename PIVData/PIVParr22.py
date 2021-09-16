@@ -32,13 +32,18 @@ set_number = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 heights_array = [.105, .115, .125, .150, .160, .170, .200, .210, .220, .245, .255, .265]
 y_shift_array = np.array([-.09833, -.10244, -.10584, -.11152, -.11331, -.11271, -.11165, -.10954, -.10754, -.09875, -.09395, -.08831])
 SPH_Name_list = ["CSV.01.005", "CSV.02.004", "CSV.0175.004", "CSV0.01.004"]
+h=[0.1, 0.1, 0.1, 0.1]
 
 # for sph_idx in range(len(SPH_Name_list)):
 
 sph_arr0 = par.read_csv_2(f"{path}/{SPH_Name_list[0]}")
+_, index0 = par.cKDTree_method(sph_arr0, h[0])
 sph_arr1 = par.read_csv_2(f"{path}/{SPH_Name_list[1]}")
+_, index1 = par.cKDTree_method(sph_arr1, h[0])
 sph_arr2 = par.read_csv_2(f"{path}/{SPH_Name_list[2]}")
+_, index2 = par.cKDTree_method(sph_arr2, h[2])
 sph_arr3 = par.read_csv_2(f"{path}/{SPH_Name_list[3]}")
+_, index3 = par.cKDTree_method(sph_arr3, h[3])
 
 sph_y0 = min(sph_arr0[:, 2])
 # sph_len = len()
@@ -51,7 +56,7 @@ sph_y0 = min(sph_arr0[:, 2])
 # average_percent_arr = np.zeros((len(heights_array), len(y_shift_array)))
 # average_percent_arr_no_outliers = np.zeros((len(heights_array), len(y_shift_array)))
 # average_percent_arr = np.zeros((len(heights_array), len(y_shift_array)))
-average_percent_arr= [pool.apply(par.main_2, args=(path, set_number, sph_y0, heights_array, y_shift_array, idx, sph_arr0, sph_arr1, sph_arr2, sph_arr3)) for idx in range(len(y_shift_array))]
+average_percent_arr= [pool.apply(par.main_2, args=(path, set_number, sph_y0, heights_array, y_shift_array, idx, sph_arr0, sph_arr1, sph_arr2, sph_arr3, index0, index1, index2, index3)) for idx in range(len(y_shift_array))]
 # idx = 0
 # for i in range(len(y_shift_array)):
 #     print(idx)
