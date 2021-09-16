@@ -31,8 +31,19 @@ set_number = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 # 12 fucking arrays...dont have to count all the time
 heights_array = [.105, .115, .125, .150, .160, .170, .200, .210, .220, .245, .255, .265]
 y_shift_array = np.array([-.09833, -.10244, -.10584, -.11152, -.11331, -.11271, -.11165, -.10954, -.10754, -.09875, -.09395, -.08831])
-sph_arr, low = par.read_csv_2(path)
-print(len(y_shift_array))
+SPH_Name_list = ["CSV.01.005", "CSV.02.004", "CSV.0175.004", "CSV0.01.004"]
+
+# for sph_idx in range(len(SPH_Name_list)):
+
+sph_arr0 = par.read_csv_2(f"{path}/{SPH_Name_list[0]}")
+sph_arr1 = par.read_csv_2(f"{path}/{SPH_Name_list[1]}")
+sph_arr2 = par.read_csv_2(f"{path}/{SPH_Name_list[2]}")
+sph_arr3 = par.read_csv_2(f"{path}/{SPH_Name_list[3]}")
+
+sph_y0 = min(sph_arr0[:, 2])
+# sph_len = len()
+# sph_arr = np.
+# print(len(y_shift_array))
 # average_percent_arr = np.zeros(len(y_shift_array)*3)
 # average_percent_temp = np.zeros(len(heights_array)*3)
 # average_percent_no_outliers_temp = np.zeros(len(heights_array))
@@ -40,7 +51,7 @@ print(len(y_shift_array))
 # average_percent_arr = np.zeros((len(heights_array), len(y_shift_array)))
 # average_percent_arr_no_outliers = np.zeros((len(heights_array), len(y_shift_array)))
 # average_percent_arr = np.zeros((len(heights_array), len(y_shift_array)))
-average_percent_arr= [pool.apply(par.main_2, args=(path, set_number, heights_array, y_shift_array, idx, sph_arr)) for idx in range(len(y_shift_array))]
+average_percent_arr= [pool.apply(par.main_2, args=(path, set_number, sph_y0, heights_array, y_shift_array, idx, sph_arr0, sph_arr1, sph_arr2, sph_arr3)) for idx in range(len(y_shift_array))]
 # idx = 0
 # for i in range(len(y_shift_array)):
 #     print(idx)
@@ -56,7 +67,7 @@ average_percent_arr= [pool.apply(par.main_2, args=(path, set_number, heights_arr
 label = ([str("{:.2f}".format(yy)) for yy in y_shift_array])
 # label = ([str(yy) for yy in y_shift_array])
 average_percent_arr = np.array(average_percent_arr)
-average_percent_arr = np.insert(average_percent_arr, 1, heights_array, axis = 1)
+# average_percent_arr = np.insert(average_percent_arr, 1, heights_array, axis = 1)
 print(average_percent_arr)
 
 np.savetxt(f"./figs2/percent.csv",  average_percent_arr[:,[1,2]],header = ','.join([str(yy) for yy in y_shift_array]),comments='', delimiter=',')

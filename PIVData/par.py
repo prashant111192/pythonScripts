@@ -9,7 +9,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from glob import glob
 from typing import TYPE_CHECKING, Tuple
 from numpy.lib.function_base import rot90
-from scipy.spatial import KDTree, distance
+from scipy.spatial import KDTree, distance, cKDTree
 
 if TYPE_CHECKING:
     from numpy import ndarray
@@ -67,7 +67,7 @@ def read_csv_2(path: str) -> Tuple["ndarray", int]:
     arr = vel(np.delete(arr, 7, 1))
     # arr2 = arr2[arr2[:, 7] == 3]
     # arr2 = np.delete(arr2, 7, 1)
-    return arr, low
+    return arr
 
 
 def loadAndVel(name_file: str) -> "ndarray":
@@ -127,9 +127,12 @@ def subtract_plt(piv_arr: "ndarray", sph_arr: "ndarray", vel_piv_index: int, vel
 
 def plot_histogram(c_: "ndarray", name: str, title: str) -> None:
     "TODO."
+    # fig, (ax1, ax2) = plt.subplots(2)
     plt.boxplot(c_, showfliers=False)
+    # ax2.boxplot(c_)
     # plt.hist(c_,)
     # plt.show()
+    plt.title(f"{title}_height_{str(name)}")
     plt.savefig(f"./figs2/{title}{str(name)}.png")
     plt.clf()
 
@@ -216,10 +219,17 @@ def quartile_range(percent: "ndarray") -> "ndarray":
     outliers_idx = (percent < (q1 - 1.5 * IQR)) | (percent > (q3 + 1.5 * IQR))
     return outliers_idx
 
-def main_2(path, set_number, heights_array, y_shift_array, idx,sph_arr):
-    average_percent_temp = np.zeros(1*3)
-    average_percent_no_outliers_temp = np.zeros(len(heights_array))
-    average_stdev_no_outliers_temp = np.zeros(len(heights_array))
+def cKDTree_method(arr,h):
+    tree =cKDTree(arr[:,0:2])
+    nn_dist,index= tree.query(arr[:,0:2],k=20, distance_upper_bound=(2*h), workers=12)
+    # nn_dist, index = dists[0][:,1]
+    # tree = BallTree(arr1[:,0:2], leaf_size=50)  
+    # nn_dist, index = tree.query_radius(arr1[:,0:2], r=2*h)
+    return (nn_dist, index)
+
+
+def main_2(path, set_number, sph_y0, heights_array, y_shift_array, idx,sph_arr0, sph_arr1, sph_arr2, sph_arr3):
+    average_percent_temp = np.zeros(4)
     # for idx in range(12):
     path_file = f"{path}/H{set_number[idx]}/"
     number_files = find_number_files(path_file)
@@ -234,10 +244,10 @@ def main_2(path, set_number, heights_array, y_shift_array, idx,sph_arr):
     pos_x_piv_max = max(data[:, 0])
     pos_y_piv_min = min(data[:, 1])
     # sph_arr, low = read_csv_2(path)
-    posy = min(sph_arr[:, 1])
+    # posy = min(sph_arr[:, 1])
     # print(posy)
-    posx = min(sph_arr[:, 0])
-    height = min(sph_arr[:, 2]) + heights_array[idx]
+    # posx = min(sph_arr[:, 0])
+    height = sph_y0 + heights_array[idx]
     shifted_data = np.copy(data)
     shifted_data[:, 1] -= pos_y_piv_min - y_shift_array[idx]
     # print(pos_y_piv_min)
@@ -245,27 +255,40 @@ def main_2(path, set_number, heights_array, y_shift_array, idx,sph_arr):
     shifted_data[:, 0] = shifted_data[:, 0] - pos_x_piv_min - (pos_x_piv_max - pos_x_piv_min) / 2
     # shifted_data = shifted_data[]
     # shifted_data[:, 0] += posx / 2
-    closest_index_sph, shifted_height= closest_point_distance(shifted_data, sph_arr, height)
-    percent, diff = subtract_plt(shifted_data, sph_arr, 4, 7, closest_index_sph)
-    # plot_graph(data[:, 0, 0], data[:, 1, 0], data[:, 4, 0])
-    # plot_graph(shifted_height[:, 0, 0], shifted_height[:,1,0], shifted_height[:,4,0])
-    # plot_2_together(data, sph_arr, None, str(heights_array[idx]), str(y_shift_array[idx]), "check")
-    outliers_idx = quartile_range(percent)
-    # print(sum(outliers_idx))
-    closest_pts = np.copy(sph_arr[closest_index_sph, :])
-    # print(closest_pts.shape)
-    # plot_2_together(shifted_height, closest_pts, None, str(heights_array[idx]), str(y_shift_array[idx]), "angle")
-    # plot_2_together(shifted_height, sph_arr, None, str(heights_array[idx]), str(y_shift_array[idx]), "check")
-    plot_2_together(shifted_height, closest_pts, outliers_idx, str(heights_array[idx]), str(y_shift_array[idx]), "outliers")
-    # plot_graph(data[~outliers_idx,0,0], data[~outliers_idx,1,0], percent[~outliers_idx], str(heights_array[idx]), str(y_shift_array[idx]), "percent")
-    plot_histogram(percent, heights_array[idx], "histogram")
+
+    percent = np.zeros((len(data),4))
+    for sph_id in range(4):
+        if sph_id==0:
+            sph_arr = sph_arr0
+        elif sph_id ==1:
+            sph_arr = sph_arr1
+        elif sph_id ==2:
+            sph_arr = sph_arr2
+        elif sph_id ==3:
+            sph_arr = sph_arr3
+        closest_index_sph, shifted_height= closest_point_distance(shifted_data, sph_arr, height)
+        percent[:,sph_id], diff = subtract_plt(shifted_data, sph_arr, 4, 7, closest_index_sph)
+        # plot_graph(data[:, 0, 0], data[:, 1, 0], data[:, 4, 0])
+        # plot_graph(shifted_height[:, 0, 0], shifted_height[:,1,0], shifted_height[:,4,0])
+        # plot_2_together(data, sph_arr, None, str(heights_array[idx]), str(y_shift_array[idx]), "check")
+        outliers_idx = quartile_range(percent)
+        # print(sum(outliers_idx))
+        closest_pts = np.copy(sph_arr[closest_index_sph, :])
+        # print(closest_pts.shape)
+        # plot_2_together(shifted_height, closest_pts, None, str(heights_array[idx]), str(y_shift_array[idx]), "angle")
+        # plot_2_together(shifted_height, sph_arr, None, str(heights_array[idx]), str(y_shift_array[idx]), "check")
+        plot_2_together(shifted_height, closest_pts, outliers_idx, str(heights_array[idx]), str(y_shift_array[idx]), "outliers")
+        # plot_graph(data[~outliers_idx,0,0], data[~outliers_idx,1,0], percent[~outliers_idx], str(heights_array[idx]), str(y_shift_array[idx]), "percent")
+    
+    plot_histogram(percent, heights_array[idx], f"sph{sph_id}_histogram")
+
     # plot_yz(shifted_height, sph_arr, str(heights_array[idx]), str(y_shift_array[idx]), "2d_yz")
     average_percent = np.average(percent)
     average_percent_no_outliers = np.average(percent[~outliers_idx])
     average_stdev_no_outliers = stats.stdev(percent[~outliers_idx])
     # print(average_percent.shape)
     # print(average_percent_no_outliers.shape)
-    average_percent_temp = ([idx, average_percent, average_percent_no_outliers, average_stdev_no_outliers])
+    average_percent_temp = ([idx, heights_array[idx], average_percent, average_percent_no_outliers, average_stdev_no_outliers])
     # average_percent_temp[idx] = average_percent
     # average_percent_no_outliers_temp[idx] = average_percent_no_outliers
     # average_stdev_no_outliers_temp[idx] = average_stdev_no_outliers
