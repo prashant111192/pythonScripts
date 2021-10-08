@@ -131,8 +131,10 @@ def plot_histogram(c_: "ndarray", name: str, title: str) -> None:
     # plt.show()
     plt.title(f"{title}_height_{str(name)}")
     plt.ylim(0,200)
-    plt.grid()
-    plt.savefig(f"./figs3/{title}_{str(name)}.png")
+    plt.minorticks_on()
+    plt.grid(b=True, which='major', linewidth='0.5')
+    plt.grid(b=True, which='minor', linestyle=':', linewidth='0.5')
+    plt.savefig(f"./figs2/{title}_{str(name)}.png")
     plt.clf()
 
 
@@ -309,7 +311,7 @@ def main_2(path, set_number, sph_y0, heights_array, y_shift_array, idx,sph_arr0,
         # plot_graph(data[:, 0, 0], data[:, 1, 0], data[:, 4, 0])
         # plot_graph(shifted_height[:, 0, 0], shifted_height[:,1,0], shifted_height[:,4,0])
         # plot_2_together(data, sph_arr, None, str(heights_array[idx]), str(y_shift_array[idx]), "check")
-        outliers_idx = quartile_range(percent)
+        outliers_idx = quartile_range(percent[:,sph_id])
         # print(sum(outliers_idx))
         closest_pts = np.copy(sph_arr[closest_index_sph, :])
         # print(closest_pts.shape)
@@ -318,12 +320,12 @@ def main_2(path, set_number, sph_y0, heights_array, y_shift_array, idx,sph_arr0,
         # plot_2_together(shifted_height, closest_pts, outliers_idx, str(heights_array[idx]), str(y_shift_array[idx]), "outliers")
         # plot_graph(data[~outliers_idx,0,0], data[~outliers_idx,1,0], percent[~outliers_idx], str(heights_array[idx]), str(y_shift_array[idx]), "percent")
     
-    plot_histogram(percent, heights_array[idx], f"sph{sph_id}_histogram")
+    plot_histogram(percent, heights_array[idx], f"sph_histogram")
 
     # plot_yz(shifted_height, sph_arr, str(heights_array[idx]), str(y_shift_array[idx]), "2d_yz")
     average_percent = np.average(percent)
     average_percent_no_outliers = np.average(percent[~outliers_idx])
-    average_stdev_no_outliers = stats.stdev(percent[~outliers_idx])
+    average_stdev_no_outliers = np.average(percent[~outliers_idx])
     # print(average_percent.shape)
     # print(average_percent_no_outliers.shape)
     average_percent_temp = ([idx, heights_array[idx], average_percent, average_percent_no_outliers, average_stdev_no_outliers])

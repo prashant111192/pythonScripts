@@ -1,0 +1,51 @@
+import numpy.matlib
+
+x_min = 0# Specify the domain
+x_max = 5
+y_min = 1
+y_max = 2
+z_min = 0
+z_max = 5
+x_res = 0.05# Specify the resolution
+y_res = 1
+z_res = 0.05
+
+n_x = 1+round((x_max-x_min)/x_res)
+n_y = 1+round((y_max-y_min)/y_res)
+n_z = 1+round((z_max-z_min)/z_res)
+
+x_list = list(range(0, n_x))
+f_x = [i * x_res for i in x_list]
+f_x = [i+x_min for i in f_x]
+f_x = numpy.array(f_x)
+y_list = list(range(0, n_y))
+f_y = [i * y_res for i in y_list]
+f_y = [i+y_min for i in f_y]
+f_y = numpy.array(f_y)
+z_list = list(range(0, n_z))
+f_z = [i * z_res for i in z_list]
+f_z = [i+z_min for i in f_z]
+f_z = numpy.array(f_z)
+f_y = f_y.reshape((-1,1))
+
+f_x = numpy.matlib.repmat(f_x.reshape((-1,1)), n_y*n_z, 1)
+f_y = numpy.matlib.repmat(f_y,1,n_x)
+f_y = f_y.flatten()
+f_y = f_y.reshape((-1,1))
+f_y = numpy.matlib.repmat(f_y,1,n_z)
+f_y = numpy.transpose(f_y)
+f_y = f_y.flatten()
+f_y = f_y.reshape((-1,1))
+
+f_z = numpy.matlib.repmat(f_z,n_x*n_y,1)
+f_z = numpy.transpose(f_z)
+f_z = f_z.flatten()
+f_z = f_z.reshape((-1,1))
+
+fpoints = numpy.concatenate((f_x, f_y, f_z), axis=1)# Generate fpoints.txt file
+myfile = open("fpoints.txt", 'w')
+numpy.savetxt("fpoints.txt", numpy.array(fpoints), fmt='%1.6f', header="Points", comments='')
+myfile.close()
+
+print("Number of measurement points: " + str(n_x*n_y*n_z))
+print(fpoints)
