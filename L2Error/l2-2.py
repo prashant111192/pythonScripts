@@ -28,15 +28,18 @@ for i in range (len(name)):
     dsph_inter_sphase = np.interp(sphase[:,0], dsph[:,0], dsph[:,1])
     dsph_inter_fluent = np.interp(fluent[:,0], dsph[:,0], dsph[:,1])
 
-    l2_sphase[i] = np.sum(np.power((sphase[:,1]-dsph_inter_sphase)/len(sphase[:,1]),2))
-    l2_fluent[i] = np.sum(np.power((fluent[:,1]-dsph_inter_fluent)/len(fluent[:,1]),2))
+    # l2_sphase[i] = np.sum(np.power((sphase[:,1]-dsph_inter_sphase),2))
+    # l2_fluent[i] = np.sum(np.power((fluent[:,1]-dsph_inter_fluent),2))
+    l2_sphase[i] = np.power(np.sum(np.power((sphase[:,1]-dsph_inter_sphase),2))/len(sphase[:,1]),0.5)
+    l2_fluent[i] = np.power(np.sum(np.power((fluent[:,1]-dsph_inter_fluent),2))/len(fluent[:,1]),0.5)
     l1_sphase[i] = np.sum(np.absolute((sphase[:,1]-dsph_inter_sphase)))/len(sphase[:,1])
     l1_fluent[i] = np.sum(np.absolute((fluent[:,1]-dsph_inter_fluent)))/len(fluent[:,1])
 
-time = [100, 5, 1]
-# plt.plot(time, l1_sphase)
-# plt.plot(time, l1_fluent)
-# plt.show()
+time = [1206, 205, 34]
+plt.plot(time, l2_sphase, label="sphase")
+plt.plot(time, l2_fluent, label = "fluent")
+plt.legend()
+plt.show()
 
 sph_fluent = np.interp(fluent[:,0], sphase[:,0], sphase[:,1])
 l2_sphase_fluent = np.sum(np.power((fluent[:,1]-sph_fluent)/len(fluent[:,1]),2))
@@ -46,35 +49,14 @@ print("fluent")
 print(l1_fluent,l2_fluent)
 print("sphase")
 print(l1_sphase, l2_sphase)
-# total_len = files.shape #for the number of timesteps
-# # print(total_len)
-# # timestep=total_len[1]-1
-# skip = total_len[1]-skip
-# # skip = skip-1
-
-
-# vavg = np.zeros(n)
-# vdiv = np.zeros(n)
-# xloc = np.zeros(n)
-
-# counter = 0
-# numberloc=n
 
 
 
-# # for i in (range (skip,total_len[1])):
-# for i in (range (numberloc)):
-#     tempavgvel = stat.mean(files[counter,skip:,3])
-#     tempdivvel = stat.stdev(files[counter,skip:,3])
-#     vavg[counter] = tempavgvel
-#     vdiv[counter] = tempdivvel
-#     xloc[counter] = files[counter,0,4]
-#     counter = counter+1
 
-# # xloc=files[1,:]
-# # vavg=files[0,:]
+
+
 # plt.plot(dsph[:,0],dsph[:,1], 'r-x', label='DSPH')
-# # plt.plot(sphase[:,0],sphase[:,1], 'r-x', label='DSPH')
+# plt.plot(sphase[:,0],sphase[:,1], 'r-x', label='DSPH')
 # plt.plot(sphase[:,0],yn, 'g-x', label='DSPH')
 # plt.ylim(-0.2, 0.05)
 # plt.show()
