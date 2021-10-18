@@ -16,7 +16,7 @@ fluent = np.loadtxt('./FluentDigester.csv', delimiter = ',', skiprows =1)
 # fluent = np.array(b)
 
 
-name = ["DSPH.015.015.100.csv", "dsph.csv", "DSPH.015.060.100.csv"]
+name = ["DSPH.015.015.100.csv", "DSPH.015.0225.100.csv","dsph.csv","DSPH.015.045.100.csv", "DSPH.015.060.100.csv"]
 # name = "dsph.csv"
 # name = "DSPH.015.060.100.csv"
 l2_sphase = np.ones(len(name))
@@ -35,9 +35,11 @@ for i in range (len(name)):
     l1_sphase[i] = np.sum(np.absolute((sphase[:,1]-dsph_inter_sphase)))/len(sphase[:,1])
     l1_fluent[i] = np.sum(np.absolute((fluent[:,1]-dsph_inter_fluent)))/len(fluent[:,1])
 
-time = [1206, 205, 34]
-plt.plot(time, l2_sphase, label="sphase")
-plt.plot(time, l2_fluent, label = "fluent")
+# time = [1206, 205, 34]
+time = [0.015, 0.0225, 0.03, 0.045,0.06]
+plt.scatter(time, l2_sphase, label="sphase")
+plt.scatter(time, l2_fluent, label = "fluent")
+plt.yscale('log')
 plt.legend()
 plt.show()
 
