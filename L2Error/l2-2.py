@@ -1,12 +1,14 @@
 #!/usr/bin/python3
 
 import sys
+from matplotlib import markers
 import numpy as np
 import csv
 import os
 import statistics as stat
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
+import tikzplotlib
 
 
 # Input sphase and fluent files
@@ -17,8 +19,8 @@ fluent = np.loadtxt('./FluentDigester.csv', delimiter = ',', skiprows =1)
 # fluent = np.array(b)
 
 
-# name = ["DSPH.015.015.100.csv", "DSPH.015.0225.100.csv","dsph.csv","DSPH.015.045.100.csv", "DSPH.015.060.100.csv"]
-name = ["DSPH.015.015.100.csv", "DSPH.015.0225.100.csv","dsph.csv","DSPH.015.045.100.csv", "DSPH.015.060.100.csv", "DSPH.015.120.100.csv"]
+name = ["DSPH.015.015.100.csv","dsph.csv","DSPH.015.060.100.csv"]
+# name = ["DSPH.015.015.100.csv", "DSPH.015.0225.100.csv","dsph.csv","DSPH.015.045.100.csv", "DSPH.015.060.100.csv", "DSPH.015.120.100.csv"]
 # name = "dsph.csv"
 # name = "DSPH.015.060.100.csv"
 l2_sphase = np.ones(len(name))
@@ -59,12 +61,14 @@ for i in range (len(name)):
 
 # time = [1206, 205, 34]
 # time = np.array([1134549, 286430, 73001, 18928])
-# time = np.array([0.015, 0.0225, 0.03, 0.045,0.06]).reshape(-1,1)
-time = np.array([0.015, 0.0225, 0.03, 0.045,0.06, 0.12]).reshape(-1,1)
+time = np.array([0.015,  0.03, 0.06]).reshape(-1,1)
+# time = np.array([0.015, 0.0225, 0.03, 0.045,0.06, 0.12]).reshape(-1,1)
 time = time*1
 
 errorSphase = l2_sphase
 errorFluent = l2_fluent
+# errorFluent[3] = errorFluent[3]*4
+# errorFluent[4] = errorFluent[4]*7
 model = LinearRegression()
 model.fit(time, errorFluent)
 y_pred = model.predict(time)
@@ -72,42 +76,50 @@ y_pred = model.predict(time)
 
 
 print(model.coef_)
-plt.plot(time, (model.coef_*time+model.intercept_))
-plt.scatter(time, errorSphase, label="sphase")
-plt.scatter(time, errorFluent, label = "fluent")
+# plt.plot(time, (errorFluent))
+# plt.plot(time, (model.intercept_+time*model.coef_))
+# plt.plot(time, (model.intercept_*time**model.coef_))
+plt.grid(which="minor")
+plt.grid(which="major")
+plt.plot(time, errorSphase, "o-",label="V/s SPHASE" )
+plt.plot(time, errorFluent,"x-", label = "V/s Fluent")
 axes = plt.gca()
 # y_vals = np.array(l2_fluent)
-plt.xlim(0.01,1)
+plt.xlim(0.,0.1)
 x_vals = np.array(axes.get_xlim())
 intercept = model.intercept_
 # intercept = 0.5*l2_sphase[0]
 # intercept = 0
 # intercept = -1*np.power(l2_sphase[0],1000000000)
-y_vals = (1) + 2 * x_vals
-# y_vals = (intercept+.1) + 2 * x_vals
-# x_vals = intercept + y_vals/2
-plt.plot(x_vals, y_vals, '-.', label = "2nd order convergence")
 # x_vals = intercept + y_vals/1
-y_vals = (0.1) + 1 * x_vals
+y_vals = 0.1*10**(x_vals)
+# y_vals = 10*x_vals
+# y_vals = 40 * x_vals
+# y_vals = 10**3 * x_vals
 plt.plot(x_vals, y_vals, '--', label="1st order convergence")
 # y_vals = intercept + 3 * x_vals
+y_vals = 1*10**(x_vals*2)
+# y_vals =   10000*x_vals**2
+# y_vals = (intercept+.1) + 2 * x_vals
+plt.plot(x_vals, y_vals, '-.', label = "2nd order convergence")
 # plt.plot(x_vals, y_vals, '--', label="3")
-plt.ylim(0.1,10)
-plt.xlim(0.01,1)
+plt.ylim(0.01,10)
+# plt.xlim(0.01,1)
 # plt.ylim(0.5*np.min(errorSphase),2*np.max(errorSphase))
 plt.yscale('log')
-plt.xscale('log')
-plt.grid(which="minor")
-plt.grid(which="major")
+# plt.xscale('log')
 plt.legend()
-plt.savefig("xx.png")
+plt.xlabel("Particle distance (m)")
+plt.ylabel("L2 error for axial velocities at 6m from bottom ")
+plt.savefig("xx.png", dpi=600)
+tikzplotlib.save("test.tex")
 plt.clf()
 # time = np.array([1134549, 286430, 73001, 18928])
 plt.plot(time, l1_sphase, label="V/s SPHASE")
 plt.plot(time, l1_fluent, label = "V/s Fluent")
 plt.legend()
 plt.yscale('log')
-plt.savefig("mesh.png")
+# plt.savefig("mesh.png")
 # plt.show()
 
 sph_fluent = np.interp(fluent[:,0], sphase[:,0], sphase[:,1])
@@ -135,6 +147,7 @@ print("ar")
 print(ar_sphase)
 print(ar_fluent)
 print(ar_sf)
+print(x_vals)
 
 
 
