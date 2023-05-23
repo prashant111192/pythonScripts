@@ -68,7 +68,7 @@ def compute(args):
         adv_v_ij = np.dot(dr, np.array([vel_x, vel_y])*absdr)
         adv_v_ji = np.dot(dr, np.array([vel_x, vel_y])*absdr)
         # adv = dker * dt * adv_v_ij 
-        adv = dker * dt * adv_v_ij *  mass*absdr[0]/density
+        adv = dker * dt * adv_v_ij *  mass/density
         adv = adv/particle_spacing
         if(adv>0):
             # Particle i gives 
@@ -76,7 +76,7 @@ def compute(args):
             # ConcTemp = ConcTemp - amount
             # print("Gives, ker: ", dker, "adv: ", adv, "Conc: ", ConcTemp, "Amount: ", amount, "NN_idx: ", k)
         # adv = dker * dt * adv_v_ji 
-        adv = dker * dt * adv_v_ji *  mass*absdr[0]/density
+        adv = dker * dt * adv_v_ji *  mass/density
         adv = adv/particle_spacing
         if(adv<0):
             # particle i gets
@@ -98,6 +98,20 @@ def main():
     else:
         if(dim==1):
             box_size = (1, particle_spacing)
+    start_index = int(particle_spacing*0.2)
+    end_index = int(particle_spacing*0.3)
+
+    # Constants for setting up the particles and their concnetrations
+    mean = 0.25  # Mean value of the Gaussian distribution
+    std_dev = 1  # Standard deviation of the Gaussian distribution
+    gaussian_values = np.zeros(end_index - start_index + 1)
+    for i in range(len(gaussian_values)):
+        gaussian_values[i] = abs((1/(std_dev*np.sqrt(2*np.pi)))*np.exp(-(((i-len(gaussian_values)/2)-mean)**2)/(2*std_dev**2)))
+
+    # normalizing the gaussian distribution
+    gaussian_values = gaussian_values/np.max(gaussian_values)
+    # creating the vector for original concentrations before any calcs
+    # cOrig[start_index:end_index + 1] = gaussian_values
 
     # Calculate the number of particles in each dimension
     num_particles_x = int(box_size[0] / particle_spacing)
@@ -130,11 +144,14 @@ def main():
 
     for i in range(num_particles):
         if 0.2 < particle_coords[i, 0] < 0.3:
-            Conc[i] = 1
+            Conc[i] = abs((1/(std_dev*np.sqrt(2*np.pi)))*np.exp(-(((particle_coords[i,0])-mean)**2)/(2*std_dev**2)))
+        # if 0.2 < particle_coords[i, 0] < 0.3:
+        #     Conc[i] = 1
+    Conc = Conc/np.max(Conc)
 
     ConcOrig = copy.deepcopy(Conc)
     # ConcOrig = Conc
-    dt = 0.0001
+    dt = 0.01
     t = np.arange(0, 2, dt)
     kernelSize = particle_spacing * 3
 
@@ -158,8 +175,8 @@ def main():
         plt.colorbar()
         plt.clim(0, 1)
         plt.grid()
-        plt.draw()
-        plt.pause(0.01)
+        # plt.draw()
+        # plt.pause(0.01)
 
     ConcTemp = Conc
     middle_conc= []
@@ -187,6 +204,7 @@ def main():
 
         # Extract the concentration values for these particles
         middle_conc = Conc[middle_particles]
+        middle_conc_orig = ConcOrig[middle_particles]
 
         # Extract the x coordinates for these particles
         middle_x = particle_coords[middle_particles, 0]
@@ -203,32 +221,36 @@ def main():
                 plt.colorbar()
                 plt.clim(0, 1)
                 plt.grid()
-                plt.draw()
-                plt.pause(0.01)
+                # plt.draw()
+                # plt.pause(0.01)
 
             # Make the LINE plot
             if(line_plot):
                 plt.clf()
                 plt.plot(middle_x, middle_conc, "x")
+                # plt.plot(middle_x, middle_conc_orig, "Orig")
                 plt.xlabel('Position along x-axis')
                 plt.ylabel('Concentration')
                 plt.title(label='Time: {:.4f} s, Total Conc = {:.4f}'.format(s+dt, np.sum(Conc*vol)))
                 plt.ylim(0, 1.5)
                 plt.grid(which='both')
-                plt.draw()
-                plt.pause(0.01)
+                # plt.draw()
+                # plt.pause(0.01)
 
         pos_max_idx = np.argmax(middle_conc)
         # print("Position of maximum concentration: {:.15f}".format(middle_x[pos_max_idx]))
 
     plt.clf()
-    plt.plot(middle_x, middle_conc, "x")
+    plt.plot(middle_x, middle_conc,label="time 0" )
+    plt.plot(middle_x, middle_conc_orig, label="time end")
     plt.xlabel('Position along x-axis')
     plt.ylabel('Concentration')
     plt.title(label='Time: {:.2f} s, Total Conc = {:.4f}'.format(s, np.sum(Conc*vol)))
+    plt.legend()
     plt.grid(which='both')
     plt.ylim(0, 1.5)
-    plt.show()
+    plt.savefig("lineplot.png")
+    # plt.show()
 
 
 if __name__ == '__main__':

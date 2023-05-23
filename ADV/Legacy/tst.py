@@ -3,54 +3,60 @@ import matplotlib.pyplot as plt
 import math
 import numpy as np
 from sklearn.neighbors import NearestNeighbors as NN
+
+# Constants for setting up the particles and their concnetrations
 mean = 0.0  # Mean value of the Gaussian distribution
 std_dev = 5  # Standard deviation of the Gaussian distribution
-dp  = 0.01
 pos_start = 0
 pos_end = 2
-size = int((pos_end-pos_start)/dp) + 1
-# size
-# size = 100  # Size of the array
-
-cOrig = np.zeros(size)
-pos = np.linspace(pos_start,pos_end,size)
-pp = copy.deepcopy(pos)
-
 start_index = 10
 end_index = 50
 
+# Constants for the simulation
+dp  = 0.01
+dt = 0.01
+time = 10
+v = 0.01 # velocity of the fluid
+kernelSize = dp*1.4
+h = kernelSize
+
+
+size = int((pos_end-pos_start)/dp) + 1
+cOrig = np.zeros(size)
+pos = np.linspace(pos_start,pos_end,size)
+pp = copy.deepcopy(pos)
 gaussian_values = np.zeros(end_index - start_index + 1)
+
+
+# making the gaussian distribution
 for i in range(len(gaussian_values)):
     gaussian_values[i] = abs((1/(std_dev*np.sqrt(2*np.pi)))*np.exp(-(((i-len(gaussian_values)/2)-mean)**2)/(2*std_dev**2)))
 
+# normalizing the gaussian distribution
 gaussian_values = gaussian_values/np.max(gaussian_values)
 cOrig[start_index:end_index + 1] = gaussian_values
 c = cOrig
-dt = 0.01
-time = 10
 n= int(time/dt)
 time = np.linspace(0,time,n)
 c_time = np.zeros([len(c),n])
+# SHOWING GRAPHS
 scatter = False
-v = 0.001
+line = False
 
+# vol_1 = math.pi*dp*dp/4
 volume = 1
-vol_1 = math.pi*dp*dp/4
-# vol_1 = 1
+vol_1 = 1
 vol_0 = 1
-# dk = -1
-# dk = -0.109847
-kernelSize = dp *6
-h = kernelSize
-r = 1
-q = r/h
+
 def dKer(r):
     q=r/h
     if(q<2):
 
+        #y=-mx
+        dk = 1
         #*********
-        qq = 1-q/2
-        dk = qq*qq *q *(-15)/(8*h*h)
+        # qq = 1-q/2
+        # dk = qq*qq *q *(-15)/(8*h*h)
         #*********
         # dk = -2*q*math.exp(-q*q)*(1/(np.pi*h*h))
         #*********
@@ -59,15 +65,18 @@ def dKer(r):
         dk = 0
     # dk = (1/h*h*math.pi)*(-2*q*math.exp(-q*q))/h
     return dk
+
+# Nearest Neighbors
 kdt = NN(radius=kernelSize, algorithm='kd_tree').fit(pp.reshape(1,-1).T)
 NN_idx = kdt.radius_neighbors(pp.reshape(1,-1).T)[1]
-# print(dk)   
-line = False
+
+# iterating through time
 for i in range(n):
     ctemp = np.zeros(len(cOrig))
     
-    # ctemp[0] = ((ctemp[0]*vol_0) + (dt * c[0] * (dk) * (-v) *vol_1/r))/volume
-    # ctemp[-1] = ((ctemp[-1]*vol_0) + (dt * c[-2] * (dk) * (v)*vol_1/r))/volume
+    # for first and the last particles
+    # ctemp[0] = ((ctemp[0]*vol_0) + (dt * c[0] * (dk) * (-v) *vol_1))/volume
+    # ctemp[-1] = ((ctemp[-1]*vol_0) + (dt * c[-2] * (dk) * (v)*vol_1))/volume
     for k in range(1,len(cOrig)-1):
         for j in (NN_idx[k]):
             dk = dKer(abs(pos[k]-pos[j]))
@@ -79,11 +88,11 @@ for i in range(n):
             b3 = v
             b4 = vol_1
             b5 = pos[k]-pos[j]
-            if(b5==0):
+            if(b5==0 ):
                 continue
-            b = dt * b1 * b2 * b3 * b4/b5
+            # b = dt * b1 * b2 * b3 * b4/b5
             # b = dt * b1 * b2 * b3 * b4/(pos[k]-pos[j])
-            # b = dt * (c[k] - c[j]) * (dk) * (v)*vol_1/(pos[k]-pos[j])
+            b = dt * (c[k] - c[j]) * (dk) * (v)*vol_1/(pos[k]-pos[j])
             
             ctemp[j] = a + b
             # ctemp[j] = ((ctemp[j]*vol_0) + (dt * (c[j-1] - c[j]) * (dk) * (v)*vol_1/(pos[j]-pos[j-1])))/volume
@@ -130,4 +139,5 @@ plt.grid(which='both')
 plt.xlabel("Pos (m)")
 plt.ylabel("Concentration")
 plt.legend()
-plt.show()
+# plt.show()
+plt.savefig("concentration.png")

@@ -50,7 +50,7 @@ def dkernelW(r,h, dim):
                 return 0
 
 def compute(args):
-    i, particle_coords, vel_x, vel_y, kernelSize, dt, Conc, density, mass, NN_idx, dim ,kernelType= args
+    i, particle_coords, vel_x, vel_y, h, dt, Conc, density, mass, NN_idx, dim ,kernelType= args
     ConcTemp = Conc[i]
     # print("i: ", i)
     for k in (NN_idx[i]):
@@ -59,12 +59,12 @@ def compute(args):
         dr = particle_coords[i] - particle_coords[k]
         r = np.linalg.norm(dr)
         if(kernelType=="Gaussian"):
-            dker = dkernelG(r,kernelSize, dim)
+            dker = dkernelG(r,h, dim)
         if(kernelType=="Wendland"):
-            dker = dkernelW(r,kernelSize, dim)
+            dker = dkernelW(r,h, dim)
         if(kernelType=="Flat"):
             dker = -1
-        # dker = dkernelG(r,kernelSize, dim)
+        # dker = dkernelG(r,h, dim)
         # dker = -1
         if(dker==0):
             continue
@@ -92,17 +92,17 @@ def main():
     # set dimensions
     dim = 1
     # Set the particle spacing and box size
-    particle_spacing = 0.01
+    dp = 0.01
     # length, width
     if(dim==2):
         box_size = (1, 0.2)
     else:
         if(dim==1):
-            box_size = (1, particle_spacing)
+            box_size = (1, dp)
 
     # Calculate the number of particles in each dimension
-    num_particles_x = int(box_size[0] / particle_spacing)
-    num_particles_y = int(box_size[1] / particle_spacing)
+    num_particles_x = int(box_size[0] / dp)
+    num_particles_y = int(box_size[1] / dp)
 
     # Create a meshgrid of particle coordinates
     x_coords = np.linspace(0, box_size[0], num_particles_x)
@@ -137,10 +137,10 @@ def main():
 
     dt = 0.1
     t = np.arange(0, 10, dt)
-    kernelSize = particle_spacing * 5
+    h = dp * 5
 
     # NEAREST NEIGHBORS
-    kdt = NN(radius=kernelSize, algorithm='kd_tree').fit(particle_coords)
+    kdt = NN(radius=h, algorithm='kd_tree').fit(particle_coords)
     NN_idx = kdt.radius_neighbors(particle_coords)[1]
 
     # Get the number of available cores
@@ -179,13 +179,13 @@ def main():
             # print("Time: ", s,"***************************************************")
             sumTempOld = sumConc(Conc, particle_coords, vol)
             # for i in range(num_particles):
-            #     args = (i, particle_coords, vel_x, vel_y, kernelSize, dt, Conc, density, mass, NN_idx, dim, x)
+            #     args = (i, particle_coords, vel_x, vel_y, h, dt, Conc, density, mass, NN_idx, dim, x)
             #     result = compute(args)
             #     ConcTemp[i]=(result)
 
             # Parallelize the loop
             with mp.Pool(num_processes) as pool:
-                ranges = [(i, particle_coords, vel_x, vel_y, kernelSize, dt, Conc, density, mass, NN_idx, dim, x) for i in range(num_particles)]
+                ranges = [(i, particle_coords, vel_x, vel_y, h, dt, Conc, density, mass, NN_idx, dim, x) for i in range(num_particles)]
                 ConcTemp = pool.map(compute, ranges)
 
             Conc= np.array(ConcTemp)
@@ -210,7 +210,8 @@ def main():
     plt.grid(which='both')
     plt.ylim(0, 1.5)
     plt.legend()
-    plt.show()
+    plt.savefig("1D_kernel_comparison.png")
+    # plt.show()
 
 
 if __name__ == '__main__':
